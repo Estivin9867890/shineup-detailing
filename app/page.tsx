@@ -9,21 +9,59 @@ import { FORMULAS } from '@/lib/mockData'
 
 const FORMULA_ICONS = { express: Zap, 'deep-clean': Droplets, premium: Star }
 
+// Numéro WhatsApp — à remplacer par votre vrai numéro (format: 33XXXXXXXXX)
+const WA_NUMBER = '33600000000'
+const WA_MSG    = encodeURIComponent('Bonjour, je voudrais un devis pour un nettoyage de véhicule 🚗')
+
 const BEFORE_AFTER_EXAMPLES = [
   {
-    imageSrc: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=1200&q=85',
-    label: 'Intérieur & tableau de bord',
-    formula: 'Express Intérieur ou Deep Clean',
-  },
-  {
-    imageSrc: 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=1200&q=85',
+    imageSrc: '/ba/mercedes.png',
+    composite: true,
     label: 'Carrosserie extérieure',
     formula: 'Deep Clean ou Intégrale Premium',
   },
   {
-    imageSrc: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1200&q=85',
-    label: 'Finition & brillance',
-    formula: 'Intégrale Premium',
+    imageSrc: '/ba/siege.png',
+    composite: true,
+    label: 'Sièges tissu & moquettes',
+    formula: 'Deep Clean — Shampouinage injecteur-extracteur',
+  },
+  {
+    imageSrc: '/ba/interieur.png',
+    composite: true,
+    label: 'Intérieur complet',
+    formula: 'Deep Clean ou Intégrale Premium',
+  },
+]
+
+const WHY_US = [
+  { label: 'Tarif',        bad: '3 – 8 € (machine)',          good: 'Dès 45 € (valeur réelle)' },
+  { label: 'Durée',        bad: '3 min de convoyeur',         good: '1h à 2h30 de soin manuel' },
+  { label: 'Résultat',     bad: 'Médiocre → rayures',         good: 'Showroom — garanti' },
+  { label: 'Déplacement',  bad: 'Vous bougez',                good: 'On vient chez vous' },
+  { label: 'Intérieur',    bad: '❌ Non traité',              good: '✅ Compris selon formule' },
+  { label: 'Produits',     bad: 'Chimiques génériques',       good: 'Koch Chemie Pro' },
+  { label: 'Garantie',     bad: 'Aucune',                     good: 'Retour gratuit sous 24h' },
+]
+
+const TEAM = [
+  {
+    name: 'Louis',
+    role: 'Co-fondateur · Polissage & finition',
+    passion: 'Passionné de carrosserie, il redonne vie aux peintures oxydées et effectue chaque polish à la main.',
+    emoji: '🔴',
+  },
+  {
+    name: 'Alexandre',
+    role: 'Co-fondateur · Shampouinage & intérieur',
+    passion: 'Expert en nettoyage tissu et cuir, il transforme les intérieurs les plus encrassés en quelques heures.',
+    emoji: '🔵',
+  },
+  {
+    name: 'Nicolas',
+    role: 'Co-fondateur · Organisation & relation client',
+    passion: "Garant de la satisfaction client — il s'assure que chaque prestation dépasse les attentes.",
+    emoji: '🟢',
   },
 ]
 
@@ -93,6 +131,19 @@ export default function HomePage() {
         <BookingTunnel onClose={() => setTunnelOpen(false)} initialFormula={selectedFormula} />
       )}
 
+      {/* ── Bouton WhatsApp flottant ── */}
+      <a
+        href={`https://wa.me/${WA_NUMBER}?text=${WA_MSG}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 bg-[#25D366] hover:bg-[#1da851] text-white font-bold text-sm px-4 py-3 rounded-full shadow-2xl shadow-green-900/50 transition-all hover:scale-105 active:scale-100"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+        </svg>
+        Devis rapide
+      </a>
+
       {/* ── Navbar ── */}
       <nav className={[
         'fixed top-0 inset-x-0 z-40 transition-all duration-300',
@@ -147,9 +198,14 @@ export default function HomePage() {
 
         <div className="relative max-w-6xl mx-auto px-4 py-28">
           <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm font-medium px-3 py-1.5 rounded-full mb-7">
-              <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
-              Disponible à Brest et alentours · Dès 45 €
+            <div className="flex flex-wrap gap-2 mb-7">
+              <div className="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm font-medium px-3 py-1.5 rounded-full">
+                <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
+                Disponible à Brest et alentours · Dès 45 €
+              </div>
+              <div className="inline-flex items-center gap-1.5 bg-orange-500/10 border border-orange-500/20 text-orange-400 text-sm font-bold px-3 py-1.5 rounded-full">
+                🔥 3 créneaux restants cette semaine
+              </div>
             </div>
 
             <h1 className="text-5xl sm:text-7xl font-black leading-[1.05] tracking-tight mb-6">
@@ -177,7 +233,15 @@ export default function HomePage() {
               </button>
             </div>
 
-            <div className="flex flex-wrap items-center gap-6 mt-10 text-sm text-slate-400">
+            {/* Garantie visible */}
+            <div className="flex items-center gap-2 mt-6 bg-white/5 border border-white/10 rounded-xl px-4 py-3 w-fit">
+              <Shield size={16} className="text-emerald-400 flex-shrink-0" />
+              <span className="text-sm text-slate-300">
+                <span className="text-white font-bold">Garantie satisfaction</span> — Pas satisfait ? On revient gratuitement dans les 24h.
+              </span>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-6 mt-6 text-sm text-slate-400">
               <div className="flex items-center gap-1.5">
                 <span className="text-yellow-400">⭐⭐⭐⭐⭐</span>
                 <span className="font-semibold text-white">4,9/5</span> Google
@@ -265,6 +329,88 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ── POURQUOI SHINEUP ? ── */}
+      <section className="py-24 px-4">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-black mb-3">Lavage auto ou ShineUp ?</h2>
+            <p className="text-slate-400 text-lg">La différence n'est pas que dans le prix.</p>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr>
+                  <th className="text-left pb-4 text-slate-500 font-medium w-1/3"></th>
+                  <th className="pb-4 text-center w-1/3">
+                    <div className="inline-flex items-center gap-2 bg-slate-800/60 border border-slate-700 rounded-xl px-4 py-2 text-slate-400 font-bold">
+                      Lavage auto classique
+                    </div>
+                  </th>
+                  <th className="pb-4 text-center w-1/3">
+                    <div className="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/30 rounded-xl px-4 py-2 text-emerald-400 font-bold">
+                      ✨ ShineUp Detailing
+                    </div>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {WHY_US.map((row, i) => (
+                  <tr key={i} className={i % 2 === 0 ? 'bg-slate-900/20' : ''}>
+                    <td className="py-3.5 px-4 font-semibold text-white rounded-l-xl">{row.label}</td>
+                    <td className="py-3.5 px-4 text-center text-slate-500">{row.bad}</td>
+                    <td className="py-3.5 px-4 text-center text-emerald-400 font-semibold rounded-r-xl">{row.good}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="mt-10 text-center">
+            <button onClick={() => openTunnel()}
+              className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-8 py-4 rounded-xl transition-all hover:scale-105">
+              Je veux le résultat showroom <ArrowRight size={18} />
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* ── NOTRE ÉQUIPE ── */}
+      <section className="py-20 px-4 bg-slate-900/30">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-black mb-3">Qui sommes-nous ?</h2>
+            <p className="text-slate-400 text-lg max-w-xl mx-auto">
+              3 étudiants brestois passionnés de voitures. On fait ça mieux qu'un pro parce qu'on y met notre réputation — pas juste du temps.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            {TEAM.map((member) => (
+              <div key={member.name} className="bg-slate-900/60 border border-slate-800 hover:border-slate-700 rounded-2xl p-6 transition-colors">
+                <div className="w-14 h-14 rounded-2xl bg-slate-800 flex items-center justify-center text-3xl mb-4">
+                  {member.emoji}
+                </div>
+                <h3 className="text-xl font-black text-white mb-0.5">{member.name}</h3>
+                <p className="text-xs text-emerald-400 font-semibold mb-3">{member.role}</p>
+                <p className="text-slate-400 text-sm leading-relaxed">{member.passion}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-10 bg-emerald-500/5 border border-emerald-500/20 rounded-2xl p-6 flex flex-col sm:flex-row items-center gap-4">
+            <p className="text-slate-300 text-sm flex-1">
+              On ne fait pas ça pour arrondir les fins de mois — on veut construire quelque chose qui dure.
+              Chaque voiture traitée est une référence de plus. C'est pourquoi on ne lâche jamais avant d'être fiers du résultat.
+            </p>
+            <button onClick={() => openTunnel()}
+              className="flex-shrink-0 flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-5 py-3 rounded-xl transition-colors text-sm whitespace-nowrap">
+              Faites confiance à l'équipe <ArrowRight size={14} />
+            </button>
+          </div>
+        </div>
+      </section>
+
       {/* ── AVANT / APRÈS ── */}
       <section id="avant-apres" className="py-24 px-4 bg-slate-900/30">
         <div className="max-w-6xl mx-auto">
@@ -278,7 +424,7 @@ export default function HomePage() {
           <div className="grid md:grid-cols-3 gap-6">
             {BEFORE_AFTER_EXAMPLES.map((ex, i) => (
               <div key={i} className="space-y-2">
-                <BeforeAfterSlider imageSrc={ex.imageSrc} />
+                <BeforeAfterSlider imageSrc={ex.imageSrc} composite={ex.composite} />
                 <div className="px-1">
                   <p className="font-semibold text-white text-sm">{ex.label}</p>
                   <p className="text-xs text-slate-500">{ex.formula}</p>
@@ -363,6 +509,39 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ── AVIS GOOGLE ── */}
+      <section className="py-16 px-4">
+        <div className="max-w-3xl mx-auto">
+          <div className="bg-gradient-to-br from-yellow-900/20 to-slate-900 border border-yellow-500/20 rounded-2xl p-8 text-center">
+            <div className="text-4xl mb-4">⭐⭐⭐⭐⭐</div>
+            <h2 className="text-2xl font-black mb-2">Vous avez été satisfait ?</h2>
+            <p className="text-slate-400 mb-6 max-w-md mx-auto leading-relaxed">
+              Un avis Google, c'est 10 secondes pour vous et ça aide d'autres Brestois à nous trouver.
+              Et ça nous fait vraiment plaisir.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <a
+                href="https://g.page/r/shineup-detailing/review"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 bg-yellow-500 hover:bg-yellow-400 text-black font-bold px-6 py-3 rounded-xl transition-colors"
+              >
+                ⭐ Laisser un avis Google
+              </a>
+              <button
+                onClick={() => openTunnel()}
+                className="inline-flex items-center justify-center gap-2 border border-slate-700 hover:border-slate-500 text-white font-semibold px-6 py-3 rounded-xl transition-colors"
+              >
+                Réserver une prestation <ArrowRight size={14} />
+              </button>
+            </div>
+            <p className="text-xs text-slate-600 mt-4">
+              Actuellement <span className="text-yellow-400 font-bold">4,9/5</span> · {'>'}20 avis
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* ── FAQ ── */}
       <section className="py-16 px-4">
         <div className="max-w-2xl mx-auto">
@@ -384,6 +563,60 @@ export default function HomePage() {
                 )}
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── PROGRAMME PARRAINAGE ── */}
+      <section className="py-16 px-4 bg-slate-900/30">
+        <div className="max-w-4xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-8 items-center">
+            <div>
+              <div className="inline-flex items-center gap-2 bg-purple-500/10 border border-purple-500/20 text-purple-400 text-sm font-bold px-3 py-1.5 rounded-full mb-5">
+                🎁 Programme Parrainage
+              </div>
+              <h2 className="text-3xl font-black mb-4">
+                Recommandez ShineUp.<br />
+                <span className="text-emerald-400">On vous récompense tous les deux.</span>
+              </h2>
+              <p className="text-slate-400 leading-relaxed mb-6">
+                Votre ami réserve une prestation ? Vous recevez <span className="text-white font-bold">−20 € sur votre prochain nettoyage</span>,
+                et lui bénéficie de <span className="text-white font-bold">−10 € sur sa première réservation</span>.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <a
+                  href={`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent('Bonjour, je voudrais parrainer un ami !')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#1da851] text-white font-bold px-5 py-3 rounded-xl transition-colors text-sm"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                  Parrainer via WhatsApp
+                </a>
+                <button onClick={() => openTunnel()}
+                  className="inline-flex items-center justify-center gap-2 border border-slate-700 hover:border-emerald-500/50 text-slate-300 hover:text-emerald-400 font-semibold px-5 py-3 rounded-xl transition-colors text-sm">
+                  Réserver d'abord <ArrowRight size={14} />
+                </button>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              {[
+                { step: '1', title: 'Vous recommandez ShineUp', desc: 'Envoyez le lien du site à un ami qui a besoin d\'un nettoyage auto.' },
+                { step: '2', title: 'Votre ami réserve', desc: 'Il mentionne votre prénom lors de la réservation.' },
+                { step: '3', title: 'Tout le monde gagne', desc: 'Vous − 20 € · Votre ami − 10 €. Appliqué dès la prestation suivante.' },
+              ].map(s => (
+                <div key={s.step} className="flex items-start gap-4 bg-slate-900/60 border border-slate-800 rounded-xl p-4">
+                  <div className="w-8 h-8 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                    <span className="text-sm font-black text-emerald-400">{s.step}</span>
+                  </div>
+                  <div>
+                    <p className="font-bold text-white text-sm mb-0.5">{s.title}</p>
+                    <p className="text-xs text-slate-500 leading-relaxed">{s.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
