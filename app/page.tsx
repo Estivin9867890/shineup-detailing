@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import { Zap, Droplets, Star, Check, ChevronRight, MapPin, Clock, Shield, ArrowRight, Phone, Mail, ChevronDown } from 'lucide-react'
 import BookingTunnel from '@/components/site/BookingTunnel'
 import BeforeAfterSlider from '@/components/site/BeforeAfterSlider'
@@ -44,26 +45,6 @@ const WHY_US = [
   { label: 'Garantie',     bad: 'Aucune',                     good: 'Retour gratuit sous 24h' },
 ]
 
-const TEAM = [
-  {
-    name: 'Louis',
-    role: 'Co-fondateur · Polissage & finition',
-    passion: 'Passionné de carrosserie, il redonne vie aux peintures oxydées et effectue chaque polish à la main.',
-    emoji: '🔴',
-  },
-  {
-    name: 'Alexandre',
-    role: 'Co-fondateur · Shampouinage & intérieur',
-    passion: 'Expert en nettoyage tissu et cuir, il transforme les intérieurs les plus encrassés en quelques heures.',
-    emoji: '🔵',
-  },
-  {
-    name: 'Nicolas',
-    role: 'Co-fondateur · Organisation & relation client',
-    passion: "Garant de la satisfaction client — il s'assure que chaque prestation dépasse les attentes.",
-    emoji: '🟢',
-  },
-]
 
 const STEPS_HOW = [
   { n: '01', title: 'Réservez en ligne', desc: 'Choisissez votre formule, votre date et votre créneau en 2 minutes.' },
@@ -85,11 +66,11 @@ const FAQ = [
 ]
 
 const NAV_TABS = [
-  { id: 'hero',       label: 'Accueil' },
-  { id: 'formules',   label: 'Nos Formules' },
-  { id: 'avant-apres',label: 'Avant / Après' },
-  { id: 'how',        label: 'Comment ça marche' },
-  { id: 'contact',    label: 'Contact' },
+  { id: 'hero',        label: 'Accueil' },
+  { id: 'formules',    label: 'Nos Formules' },
+  { id: 'avant-apres', label: 'Avant / Après' },
+  { id: 'how',         label: 'Comment ça marche' },
+  { id: 'contact',     label: 'Contact' },
 ]
 
 export default function HomePage() {
@@ -176,13 +157,19 @@ export default function HomePage() {
             ))}
           </div>
 
-          {/* CTA */}
-          <button
-            onClick={() => openTunnel()}
-            className="flex-shrink-0 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold px-4 py-2 rounded-lg transition-colors"
-          >
-            Réserver
-          </button>
+          {/* CTA + À propos */}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <Link href="/about"
+              className="hidden sm:block text-sm font-medium text-slate-400 hover:text-white transition-colors px-2 py-1">
+              À propos
+            </Link>
+            <button
+              onClick={() => openTunnel()}
+              className="bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold px-4 py-2 rounded-lg transition-colors"
+            >
+              Réserver
+            </button>
+          </div>
         </div>
       </nav>
 
@@ -370,42 +357,6 @@ export default function HomePage() {
             <button onClick={() => openTunnel()}
               className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-8 py-4 rounded-xl transition-all hover:scale-105">
               Je veux le résultat showroom <ArrowRight size={18} />
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* ── NOTRE ÉQUIPE ── */}
-      <section className="py-20 px-4 bg-slate-900/30">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-black mb-3">Qui sommes-nous ?</h2>
-            <p className="text-slate-400 text-lg max-w-xl mx-auto">
-              3 étudiants brestois passionnés de voitures. On fait ça mieux qu'un pro parce qu'on y met notre réputation — pas juste du temps.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-6">
-            {TEAM.map((member) => (
-              <div key={member.name} className="bg-slate-900/60 border border-slate-800 hover:border-slate-700 rounded-2xl p-6 transition-colors">
-                <div className="w-14 h-14 rounded-2xl bg-slate-800 flex items-center justify-center text-3xl mb-4">
-                  {member.emoji}
-                </div>
-                <h3 className="text-xl font-black text-white mb-0.5">{member.name}</h3>
-                <p className="text-xs text-emerald-400 font-semibold mb-3">{member.role}</p>
-                <p className="text-slate-400 text-sm leading-relaxed">{member.passion}</p>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-10 bg-emerald-500/5 border border-emerald-500/20 rounded-2xl p-6 flex flex-col sm:flex-row items-center gap-4">
-            <p className="text-slate-300 text-sm flex-1">
-              On ne fait pas ça pour arrondir les fins de mois — on veut construire quelque chose qui dure.
-              Chaque voiture traitée est une référence de plus. C'est pourquoi on ne lâche jamais avant d'être fiers du résultat.
-            </p>
-            <button onClick={() => openTunnel()}
-              className="flex-shrink-0 flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-5 py-3 rounded-xl transition-colors text-sm whitespace-nowrap">
-              Faites confiance à l'équipe <ArrowRight size={14} />
             </button>
           </div>
         </div>
