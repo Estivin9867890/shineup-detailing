@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { Phone, Mail, MapPin, ArrowRight, Clock } from 'lucide-react'
 
-const WA_NUMBER = '33600000000'
+const WA_NUMBER = '33647805116'
 const WA_MSG = encodeURIComponent('Bonjour, je voudrais un devis pour un nettoyage de véhicule 🚗')
 
 const WA_ICON = (
@@ -59,7 +59,7 @@ export default function ContactPage() {
               </div>
               <div>
                 <p className="text-xs text-slate-500 mb-0.5">Téléphone</p>
-                <p className="font-bold text-white">06 XX XX XX XX</p>
+                <a href="tel:+33647805116" className="font-bold text-white hover:text-emerald-400 transition-colors">06 47 80 51 16</a>
               </div>
             </div>
 
@@ -69,7 +69,7 @@ export default function ContactPage() {
               </div>
               <div>
                 <p className="text-xs text-slate-500 mb-0.5">Email</p>
-                <p className="font-bold text-white">contact@shineup-detailing.fr</p>
+                <a href="mailto:shineup.brest@gmail.com" className="font-bold text-white hover:text-emerald-400 transition-colors">shineup.brest@gmail.com</a>
               </div>
             </div>
 

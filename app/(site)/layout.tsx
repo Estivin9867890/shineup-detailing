@@ -1,7 +1,7 @@
 import Navbar from '@/components/site/Navbar'
 import Footer from '@/components/site/Footer'
 
-const WA_NUMBER = '33600000000'
+const WA_NUMBER = '33647805116'
 const WA_MSG = encodeURIComponent('Bonjour, je voudrais un devis pour un nettoyage de véhicule 🚗')
 
 export default function SiteLayout({ children }: { children: React.ReactNode }) {

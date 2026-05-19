@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { Clock, MapPin, Shield, ArrowRight, ChevronRight } from 'lucide-react'
 
-const WA_NUMBER = '33600000000'
+const WA_NUMBER = '33647805116'
 
 const STEPS = [
   { n: '01', title: 'Réservez en ligne', desc: 'Choisissez votre formule, votre date et votre créneau en 2 minutes.' },
