@@ -3,9 +3,9 @@ import { ArrowRight } from 'lucide-react'
 import BeforeAfterSlider from '@/components/site/BeforeAfterSlider'
 
 const BEFORE_AFTER_EXAMPLES = [
-  { imageSrc: '/ba/mercedes.png', composite: true, label: 'Carrosserie extérieure', formula: 'Deep Clean ou Intégrale Premium' },
-  { imageSrc: '/ba/siege.png',    composite: true, label: 'Sièges tissu & moquettes', formula: 'Deep Clean — Shampouinage injecteur-extracteur' },
-  { imageSrc: '/ba/interieur.png', composite: true, label: 'Intérieur complet', formula: 'Deep Clean ou Intégrale Premium' },
+  { beforeSrc: '/ba/peugeot-avant.png', afterSrc: '/ba/peugeot-apres.png', label: 'Carrosserie extérieure', formula: 'Deep Clean ou Intégrale Premium' },
+  { beforeSrc: '/ba/bmw-int-avant.png', afterSrc: '/ba/bmw-int-apres.png', label: 'Intérieur cuir — BMW Série 1', formula: 'Deep Clean ou Intégrale Premium' },
+  { beforeSrc: '/ba/sieges-avant.png',  afterSrc: '/ba/sieges-apres.png',  label: 'Sièges tissu & moquettes', formula: 'Deep Clean — Shampouinage injecteur-extracteur' },
 ]
 
 const TESTIMONIALS = [
@@ -41,7 +41,7 @@ export default function AvantApresPage() {
         <div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-6">
           {BEFORE_AFTER_EXAMPLES.map((ex, i) => (
             <div key={i} className="space-y-2">
-              <BeforeAfterSlider imageSrc={ex.imageSrc} composite={ex.composite} />
+              <BeforeAfterSlider beforeSrc={ex.beforeSrc} afterSrc={ex.afterSrc} />
               <div className="px-1">
                 <p className="font-semibold text-white text-sm">{ex.label}</p>
                 <p className="text-xs text-slate-500">{ex.formula}</p>
