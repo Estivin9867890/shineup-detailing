@@ -1,5 +1,14 @@
 import { NextResponse } from 'next/server'
 import { dbServer, DB_ID } from '@/lib/appwrite-server'
+import { Query } from 'node-appwrite'
+
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url)
+  const collection = searchParams.get('collection')
+  if (!collection) return NextResponse.json({ error: 'missing collection' }, { status: 400 })
+  const res = await dbServer.listDocuments(DB_ID, collection, [Query.limit(500)])
+  return NextResponse.json(res.documents)
+}
 
 export async function POST(req: Request) {
   const { collection, id, data } = await req.json()
