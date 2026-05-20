@@ -1,47 +1,21 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   LayoutDashboard, CalendarDays, Package, LogOut,
   Plus, X, Globe, Users, Trash2, BarChart2, ShoppingBag, Car, CalendarRange,
   TrendingUp, Database, FileText, Search, AlertCircle,
 } from 'lucide-react'
-
-// ═══════════════════════════════════════════════════════════════
-// TYPES
-// ═══════════════════════════════════════════════════════════════
-
-type FormulaKey    = 'express' | 'deep-clean' | 'premium'
-type VehicleSize   = 'standard' | 'suv'
-type Source        = 'web' | 'manual'
-type BookingStatus = 'completed' | 'confirmed' | 'pending'
-type ExpenseCat    = 'marketing' | 'material' | 'transport'
-
-interface Booking {
-  id: string; date: string; clientName: string
-  formula: FormulaKey; vehicleSize: VehicleSize
-  source: Source; status: BookingStatus
-  price: number; assignedTo: string
-}
-
-interface Expense {
-  id: string; date: string
-  category: ExpenseCat; label: string; amount: number
-}
-
-interface Supply {
-  id: string; name: string
-  category: 'product' | 'equipment' | 'consumable'
-  unit: string; qty: number; minQty: number
-  usePerJob: number; cost: number
-}
-
-interface ClientProfile {
-  name: string; totalSpent: number; visits: number
-  lastVisit: string; daysSince: number
-  favoriteFormula: FormulaKey; formulas: Record<FormulaKey, number>
-}
+import type {
+  FormulaKey, VehicleSize, Source, BookingStatus, ExpenseCat,
+  Booking, Expense, Supply, ClientProfile,
+} from '@/lib/dash-types'
+import {
+  fetchBookings, saveBooking, removeBooking,
+  fetchExpenses, saveExpense, removeExpense,
+  fetchSupplies, updateSupplyQty,
+} from '@/lib/appwrite-client'
 
 // ═══════════════════════════════════════════════════════════════
 // CONSTANTES
@@ -163,7 +137,7 @@ function computeStats(bookings: Booking[], expenses: Expense[]) {
   })
 
   // Projection fin de mois (interpolation linéaire sur les 31 jours de mai)
-  const dayOfMonth = 18  // aujourd'hui = 18 mai
+  const dayOfMonth = new Date().getDate()
   const projection = Math.round(netProfit / dayOfMonth * 31)
 
   return {
@@ -1907,13 +1881,37 @@ type Tab = 'overview' | 'bookings' | 'logistics' | 'calendar' | 'clients' | 'mar
 export default function DashboardPage() {
   const router = useRouter()
   const [tab,        setTab]       = useState<Tab>('overview')
-  const [bookings,   setBookings]  = useState<Booking[]>(INIT_BOOKINGS)
-  const [expenses,   setExpenses]  = useState<Expense[]>(INIT_EXPENSES)
-  const [supplies,   setSupplies]  = useState<Supply[]>(INIT_SUPPLIES)
+  const [bookings,   setBookings]  = useState<Booking[]>([])
+  const [expenses,   setExpenses]  = useState<Expense[]>([])
+  const [supplies,   setSupplies]  = useState<Supply[]>([])
+  const [loading,    setLoading]   = useState(true)
   const [modalBook,  setModalBook] = useState(false)
   const [modalExp,   setModalExp]  = useState(false)
   const [modalDevis, setModalDevis] = useState(false)
   const [modalAds,   setModalAds]  = useState(false)
+  const suppliesReady = useRef(false)
+
+  // Chargement initial depuis Appwrite
+  useEffect(() => {
+    Promise.all([fetchBookings(), fetchExpenses(), fetchSupplies()])
+      .then(([bks, exps, sups]) => {
+        setBookings(bks)
+        setExpenses(exps)
+        setSupplies(sups)
+        suppliesReady.current = true
+      })
+      .catch(err => console.error('Appwrite load error:', err))
+      .finally(() => setLoading(false))
+  }, [])
+
+  // Sync des quantités stocks vers Appwrite (debounce 1,5s)
+  useEffect(() => {
+    if (!suppliesReady.current) return
+    const timer = setTimeout(() => {
+      supplies.forEach(s => updateSupplyQty(s.id, s.qty).catch(() => {}))
+    }, 1500)
+    return () => clearTimeout(timer)
+  }, [supplies])
 
   const s = useMemo(() => computeStats(bookings, expenses), [bookings, expenses])
 
@@ -1933,13 +1931,26 @@ export default function DashboardPage() {
     { id: 'stats',      label: 'Stats',       icon: <BarChart2 size={14} />      },
   ]
 
+  const monthLabel = new Date().toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#0d0d0d] flex items-center justify-center gap-3 text-neutral-500">
+        <svg className="animate-spin" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+        </svg>
+        Chargement des données…
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-[#0d0d0d] text-white antialiased">
 
-      {modalBook  && <AddBookingModal onClose={() => setModalBook(false)}  onAdd={b => setBookings(prev => [...prev, b])} />}
-      {modalExp   && <AddExpenseModal onClose={() => setModalExp(false)}   onAdd={e => setExpenses(prev => [...prev, e])} />}
+      {modalBook  && <AddBookingModal onClose={() => setModalBook(false)}  onAdd={b => { setBookings(prev => [b, ...prev]); saveBooking(b).catch(console.error) }} />}
+      {modalExp   && <AddExpenseModal onClose={() => setModalExp(false)}   onAdd={e => { setExpenses(prev => [e, ...prev]); saveExpense(e).catch(console.error) }} />}
       {modalDevis && <DevisModal      onClose={() => setModalDevis(false)} />}
-      {modalAds   && <AddAdsModal     onClose={() => setModalAds(false)}   onAdd={e => setExpenses(prev => [...prev, e])} />}
+      {modalAds   && <AddAdsModal     onClose={() => setModalAds(false)}   onAdd={e => { setExpenses(prev => [e, ...prev]); saveExpense(e).catch(console.error) }} />}
 
       {/* ── Header ── */}
       <header className="sticky top-0 z-40 bg-[#0d0d0d]/90 backdrop-blur-xl border-b border-neutral-800">
@@ -1949,7 +1960,7 @@ export default function DashboardPage() {
               <span className="text-lg">✨</span>
               <span className="font-black text-[15px] tracking-tight">ShineUp</span>
               <span className="text-neutral-700 hidden sm:block">|</span>
-              <span className="text-[13px] text-neutral-600 hidden sm:block">Dashboard · Mai 2026</span>
+              <span className="text-[13px] text-neutral-600 hidden sm:block capitalize">Dashboard · {monthLabel}</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="hidden sm:flex items-center gap-1.5 bg-neutral-900 border border-neutral-800 px-2.5 py-1.5 rounded-full text-[11px] font-bold font-mono">
@@ -1990,11 +2001,11 @@ export default function DashboardPage() {
         {tab === 'overview'  && <OverviewTab s={s} />}
         {tab === 'bookings'  && (
           <BookingsTab bookings={bookings} onAdd={() => setModalBook(true)}
-            onDelete={id => setBookings(prev => prev.filter(b => b.id !== id))} />
+            onDelete={id => { setBookings(prev => prev.filter(b => b.id !== id)); removeBooking(id).catch(console.error) }} />
         )}
         {tab === 'logistics' && (
           <LogisticsTab expenses={expenses} s={s} onAdd={() => setModalExp(true)}
-            onDelete={id => setExpenses(prev => prev.filter(e => e.id !== id))} />
+            onDelete={id => { setExpenses(prev => prev.filter(e => e.id !== id)); removeExpense(id).catch(console.error) }} />
         )}
         {tab === 'calendar'  && <CalendarTab bookings={bookings} s={s} />}
         {tab === 'clients'   && <ClientsTab bookings={bookings} />}

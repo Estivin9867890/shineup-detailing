@@ -1,5 +1,6 @@
 import { Resend } from 'resend'
 import { NextResponse } from 'next/server'
+import { dbServer, DB_ID, COLS } from '@/lib/appwrite-server'
 
 const resend = process.env.RESEND_API_KEY && process.env.RESEND_API_KEY !== 're_VOTRE_CLE_ICI'
   ? new Resend(process.env.RESEND_API_KEY)
@@ -256,6 +257,19 @@ export async function POST(req: Request) {
         html:     clientHtml(name, formulaName, date, time, total),
       })
     }
+
+    // Save to Appwrite (citadine/berline → 'standard', suv → 'suv')
+    const bookingId = `bk-${Date.now()}`
+    await dbServer.createDocument(DB_ID, COLS.bookings, bookingId, {
+      date:        date,
+      clientName:  name,
+      formula:     formula,
+      vehicleSize: vehicleSize === 'suv' ? 'suv' : 'standard',
+      source:      'web',
+      status:      'pending',
+      price:       total,
+      assignedTo:  '',
+    }).catch(err => console.error('Appwrite save error:', err))
 
     return NextResponse.json({ ok: true })
   } catch (err) {
