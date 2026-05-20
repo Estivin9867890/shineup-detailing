@@ -147,11 +147,15 @@ function AddBookingModal({ onClose, onAdd }: {
   onClose: () => void
   onAdd: (b: Booking) => void
 }) {
-  const [name, setName]     = useState('')
+  const [name,    setName]    = useState('')
+  const [phone,   setPhone]   = useState('')
+  const [address, setAddress] = useState('')
   const [formula, setFormula] = useState<FormulaKey>('deep-clean')
-  const [size, setSize]     = useState<VehicleSize>('standard')
-  const [who, setWho]       = useState('Louis')
-  const [date, setDate]     = useState(new Date().toISOString().slice(0, 10))
+  const [size,    setSize]    = useState<VehicleSize>('standard')
+  const [who,     setWho]     = useState('Louis')
+  const [date,    setDate]    = useState(new Date().toISOString().slice(0, 10))
+  const [time,    setTime]    = useState('09:00')
+  const [status,  setStatus]  = useState<'completed' | 'confirmed' | 'pending'>('completed')
 
   const price = FORMULA_PRICES[formula][size]
 
@@ -161,67 +165,101 @@ function AddBookingModal({ onClose, onAdd }: {
     onAdd({
       id: `bk-${Date.now()}`, date, clientName: name.trim(),
       formula, vehicleSize: size, source: 'manual',
-      status: 'completed', price, assignedTo: who,
+      status, price, assignedTo: who,
+      time: time || undefined,
+      phone: phone.trim() || undefined,
+      address: address.trim() || undefined,
     })
     onClose()
   }
 
   return (
     <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
-      <div className="bg-neutral-900 border border-neutral-800 rounded-t-2xl sm:rounded-2xl w-full max-w-md shadow-2xl">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-800">
-          <h3 className="font-black text-white">Ajouter un lavage manuel</h3>
+      <div className="bg-neutral-900 border border-neutral-800 rounded-t-2xl sm:rounded-2xl w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-800 sticky top-0 bg-neutral-900 z-10">
+          <h3 className="font-black text-white">Ajouter un lavage</h3>
           <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-400 transition-colors">
             <X size={14} />
           </button>
         </div>
 
         <form onSubmit={submit} className="p-5 space-y-4">
-          <div>
-            <label className="label-sm">Nom du client *</label>
-            <input
-              required autoFocus
-              value={name} onChange={e => setName(e.target.value)}
-              placeholder="Jean Dupont"
-              className="inp"
-            />
-          </div>
-
-          <div>
-            <label className="label-sm">Formule</label>
-            <div className="grid grid-cols-3 gap-2">
-              {(['express', 'deep-clean', 'premium'] as FormulaKey[]).map(f => (
-                <button key={f} type="button" onClick={() => setFormula(f)}
-                  className={`py-2.5 rounded-xl text-xs font-bold border transition-all ${formula === f ? 'bg-emerald-500/10 border-emerald-500 text-emerald-400' : 'bg-neutral-800 border-neutral-700 text-neutral-400 hover:border-neutral-600'}`}>
-                  {f === 'express' ? 'Express' : f === 'deep-clean' ? 'Deep Clean' : 'Premium'}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <label className="label-sm">Véhicule</label>
-            <div className="grid grid-cols-2 gap-2">
-              {(['standard', 'suv'] as VehicleSize[]).map(s => (
-                <button key={s} type="button" onClick={() => setSize(s)}
-                  className={`py-2.5 rounded-xl text-xs font-bold border transition-all ${size === s ? 'bg-emerald-500/10 border-emerald-500 text-emerald-400' : 'bg-neutral-800 border-neutral-700 text-neutral-400 hover:border-neutral-600'}`}>
-                  {s === 'standard' ? 'Standard' : 'SUV (+20 €)'}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
+          {/* Client */}
+          <div className="space-y-3">
+            <p className="text-[10px] font-black uppercase tracking-widest text-neutral-600">Client</p>
             <div>
-              <label className="label-sm">Date</label>
-              <input type="date" value={date} onChange={e => setDate(e.target.value)}
-                style={{ colorScheme: 'dark' }} className="inp" />
+              <label className="label-sm">Nom *</label>
+              <input required autoFocus value={name} onChange={e => setName(e.target.value)}
+                placeholder="Jean Dupont" className="inp" />
             </div>
             <div>
-              <label className="label-sm">Attribué à</label>
-              <select value={who} onChange={e => setWho(e.target.value)} className="inp">
-                {TEAM.map(t => <option key={t} value={t}>{t}</option>)}
-              </select>
+              <label className="label-sm">Téléphone</label>
+              <input type="tel" value={phone} onChange={e => setPhone(e.target.value)}
+                placeholder="06 12 34 56 78" className="inp" />
+            </div>
+            <div>
+              <label className="label-sm">Adresse d&apos;intervention</label>
+              <input value={address} onChange={e => setAddress(e.target.value)}
+                placeholder="12 rue de la Paix, Brest" className="inp" />
+            </div>
+          </div>
+
+          {/* Prestation */}
+          <div className="space-y-3 pt-2 border-t border-neutral-800">
+            <p className="text-[10px] font-black uppercase tracking-widest text-neutral-600">Prestation</p>
+            <div>
+              <label className="label-sm">Formule</label>
+              <div className="grid grid-cols-3 gap-2">
+                {(['express', 'deep-clean', 'premium'] as FormulaKey[]).map(f => (
+                  <button key={f} type="button" onClick={() => setFormula(f)}
+                    className={`py-2.5 rounded-xl text-xs font-bold border transition-all ${formula === f ? 'bg-emerald-500/10 border-emerald-500 text-emerald-400' : 'bg-neutral-800 border-neutral-700 text-neutral-400 hover:border-neutral-600'}`}>
+                    {f === 'express' ? 'Express' : f === 'deep-clean' ? 'Deep Clean' : 'Premium'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="label-sm">Véhicule</label>
+              <div className="grid grid-cols-2 gap-2">
+                {(['standard', 'suv'] as VehicleSize[]).map(sv => (
+                  <button key={sv} type="button" onClick={() => setSize(sv)}
+                    className={`py-2.5 rounded-xl text-xs font-bold border transition-all ${size === sv ? 'bg-emerald-500/10 border-emerald-500 text-emerald-400' : 'bg-neutral-800 border-neutral-700 text-neutral-400 hover:border-neutral-600'}`}>
+                    {sv === 'standard' ? 'Standard / Berline' : 'SUV / Monospace'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="label-sm">Statut</label>
+              <div className="grid grid-cols-3 gap-2">
+                {(['completed', 'confirmed', 'pending'] as const).map(st => (
+                  <button key={st} type="button" onClick={() => setStatus(st)}
+                    className={`py-2 rounded-xl text-xs font-bold border transition-all ${status === st ? 'bg-emerald-500/10 border-emerald-500 text-emerald-400' : 'bg-neutral-800 border-neutral-700 text-neutral-400 hover:border-neutral-600'}`}>
+                    {st === 'completed' ? 'Terminée' : st === 'confirmed' ? 'Confirmée' : 'En attente'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-3">
+              <div>
+                <label className="label-sm">Date</label>
+                <input type="date" value={date} onChange={e => setDate(e.target.value)}
+                  style={{ colorScheme: 'dark' }} className="inp" />
+              </div>
+              <div>
+                <label className="label-sm">Heure</label>
+                <input type="time" value={time} onChange={e => setTime(e.target.value)}
+                  style={{ colorScheme: 'dark' }} className="inp" />
+              </div>
+              <div>
+                <label className="label-sm">Technicien</label>
+                <select value={who} onChange={e => setWho(e.target.value)} className="inp">
+                  {TEAM.map(t => <option key={t} value={t}>{t}</option>)}
+                </select>
+              </div>
             </div>
           </div>
 
