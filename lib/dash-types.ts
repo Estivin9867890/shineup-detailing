@@ -16,6 +16,11 @@ export interface Booking {
   status: BookingStatus
   price: number
   assignedTo: string
+  time?: string
+  phone?: string
+  email?: string
+  address?: string
+  notes?: string
 }
 
 export interface Expense {

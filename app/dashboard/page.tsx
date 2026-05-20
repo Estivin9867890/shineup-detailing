@@ -38,65 +38,6 @@ const TEAM         = ['Louis', 'Alexandre', 'Nicolas']
 const URSSAF_RATE  = 0.212
 const GOAL         = 1000
 
-// ═══════════════════════════════════════════════════════════════
-// DONNÉES MOCKÉES — remplacez par des appels Supabase
-// ═══════════════════════════════════════════════════════════════
-
-const INIT_BOOKINGS: Booking[] = [
-  { id:'bk-001', date:'2026-05-03', clientName:'Marie Dupont',      formula:'deep-clean', vehicleSize:'standard', source:'web',    status:'completed', price:85,  assignedTo:'Louis'  },
-  { id:'bk-002', date:'2026-05-03', clientName:'Julien Martin',     formula:'express',    vehicleSize:'standard', source:'manual', status:'completed', price:45,  assignedTo:'Alexandre' },
-  { id:'bk-003', date:'2026-05-04', clientName:'Sophie Mercier',    formula:'premium',    vehicleSize:'suv',      source:'web',    status:'completed', price:145, assignedTo:'Louis'  },
-  { id:'bk-004', date:'2026-05-04', clientName:'Pierre Leblanc',    formula:'deep-clean', vehicleSize:'standard', source:'web',    status:'completed', price:85,  assignedTo:'Alexandre' },
-  { id:'bk-005', date:'2026-05-05', clientName:'Claire Thomas',     formula:'deep-clean', vehicleSize:'standard', source:'manual', status:'completed', price:85,  assignedTo:'Louis'  },
-  { id:'bk-006', date:'2026-05-06', clientName:'Kevin Rousseau',    formula:'express',    vehicleSize:'standard', source:'manual', status:'completed', price:45,  assignedTo:'Alexandre' },
-  { id:'bk-007', date:'2026-05-07', clientName:'Isabelle Girard',   formula:'premium',    vehicleSize:'standard', source:'web',    status:'completed', price:125, assignedTo:'Louis'  },
-  { id:'bk-008', date:'2026-05-08', clientName:'Franck Petit',      formula:'deep-clean', vehicleSize:'suv',      source:'web',    status:'completed', price:105, assignedTo:'Alexandre' },
-  { id:'bk-009', date:'2026-05-09', clientName:'Nathalie Simon',    formula:'express',    vehicleSize:'standard', source:'manual', status:'completed', price:45,  assignedTo:'Louis'  },
-  { id:'bk-010', date:'2026-05-09', clientName:'Antoine Morel',     formula:'deep-clean', vehicleSize:'standard', source:'web',    status:'completed', price:85,  assignedTo:'Alexandre' },
-  { id:'bk-011', date:'2026-05-10', clientName:'Emma Bernard',      formula:'deep-clean', vehicleSize:'standard', source:'web',    status:'completed', price:85,  assignedTo:'Louis'  },
-  { id:'bk-012', date:'2026-05-11', clientName:'Nicolas Faure',     formula:'express',    vehicleSize:'standard', source:'manual', status:'completed', price:45,  assignedTo:'Alexandre' },
-  { id:'bk-013', date:'2026-05-12', clientName:'Laure Chevalier',   formula:'deep-clean', vehicleSize:'standard', source:'web',    status:'completed', price:85,  assignedTo:'Louis'  },
-  { id:'bk-014', date:'2026-05-14', clientName:'Sébastien Laurent', formula:'express',    vehicleSize:'standard', source:'manual', status:'completed', price:45,  assignedTo:'Alexandre' },
-  { id:'bk-015', date:'2026-05-15', clientName:'Audrey Roux',       formula:'premium',    vehicleSize:'suv',      source:'web',    status:'completed', price:145, assignedTo:'Louis'  },
-  { id:'bk-016', date:'2026-05-16', clientName:'Maxime Blanc',      formula:'deep-clean', vehicleSize:'standard', source:'web',    status:'completed', price:85,  assignedTo:'Alexandre' },
-  { id:'bk-017', date:'2026-05-16', clientName:'Camille Dubois',    formula:'deep-clean', vehicleSize:'standard', source:'manual', status:'completed', price:85,  assignedTo:'Louis'  },
-  { id:'bk-018', date:'2026-05-18', clientName:'Paul Fontaine',     formula:'deep-clean', vehicleSize:'standard', source:'web',    status:'pending',   price:85,  assignedTo:'Alexandre' },
-  { id:'bk-019', date:'2026-05-20', clientName:'Léa Garnier',       formula:'express',    vehicleSize:'standard', source:'web',    status:'confirmed', price:45,  assignedTo:'Louis'  },
-]
-
-const INIT_EXPENSES: Expense[] = [
-  { id:'ex-001', date:'2026-05-01', category:'marketing', label:'Google Ads – Brest Local',           amount:70  },
-  { id:'ex-002', date:'2026-05-01', category:'marketing', label:'Meta Ads – Reels avant/après',       amount:50  },
-  { id:'ex-003', date:'2026-05-02', category:'material',  label:'Koch Chemie – Produits détailing',   amount:95  },
-  { id:'ex-004', date:'2026-05-02', category:'material',  label:'Microfibres premium (pack 10)',       amount:35  },
-  { id:'ex-005', date:'2026-05-10', category:'material',  label:'APC concentré + dégraissant jantes', amount:28  },
-  { id:'ex-006', date:'2026-05-05', category:'transport', label:'Essence – semaine 1',                amount:35  },
-  { id:'ex-007', date:'2026-05-12', category:'transport', label:'Essence – semaine 2',                amount:30  },
-  { id:'ex-008', date:'2026-05-07', category:'transport', label:'Péages A630',                        amount:12  },
-]
-// CA = 1 425 € | URSSAF = 302 € | Dépenses = 355 € | Net = 768 € | /pers = 256 €
-
-const INIT_SUPPLIES: Supply[] = [
-  { id:'sp-001', name:'APC Koch Chemie MO',      category:'product',    unit:'L',   qty:3.5,  minQty:1.0, usePerJob:0.15, cost:12   },
-  { id:'sp-002', name:'Shampoing carrosserie',   category:'product',    unit:'L',   qty:2.0,  minQty:0.5, usePerJob:0.10, cost:8    },
-  { id:'sp-003', name:'Dégraissant jantes',      category:'product',    unit:'L',   qty:0.4,  minQty:0.5, usePerJob:0.08, cost:9    },
-  { id:'sp-004', name:'Cire / Sealant',          category:'product',    unit:'L',   qty:0.8,  minQty:0.3, usePerJob:0.05, cost:25   },
-  { id:'sp-005', name:'Nettoyant vitres',        category:'product',    unit:'L',   qty:1.5,  minQty:0.4, usePerJob:0.06, cost:6    },
-  { id:'sp-006', name:'Microfibres premium',     category:'consumable', unit:'pcs', qty:12,   minQty:4,   usePerJob:0.5,  cost:3.5  },
-  { id:'sp-007', name:'Gants jetables',          category:'consumable', unit:'pcs', qty:6,    minQty:10,  usePerJob:2,    cost:0.3  },
-  { id:'sp-008', name:'Sacs poubelle',           category:'consumable', unit:'pcs', qty:40,   minQty:10,  usePerJob:2,    cost:0.15 },
-  { id:'sp-009', name:'Brosses détailing kit',   category:'equipment',  unit:'pcs', qty:8,    minQty:3,   usePerJob:0,    cost:15   },
-  { id:'sp-010', name:'Éponges applicateur',     category:'equipment',  unit:'pcs', qty:6,    minQty:2,   usePerJob:0,    cost:2    },
-]
-
-// Historique des 5 mois précédents (mocké — à remplacer par Supabase)
-const HISTORY_PREV = [
-  { month: 'Déc', year: 2025, net: 0,   goalPct: 0,  jobs: 0 },
-  { month: 'Jan', year: 2026, net: 0,   goalPct: 0,  jobs: 0 },
-  { month: 'Fév', year: 2026, net: 0,   goalPct: 0,  jobs: 0 },
-  { month: 'Mar', year: 2026, net: 0,   goalPct: 0,  jobs: 0 },
-  { month: 'Avr', year: 2026, net: 321, goalPct: 32, jobs: 8 },
-]
 
 // ═══════════════════════════════════════════════════════════════
 // MOTEUR DE CALCUL — toutes les métriques sont dérivées ici
@@ -1253,11 +1194,24 @@ function StocksTab({ supplies, setSupplies }: {
 // ═══════════════════════════════════════════════════════════════
 
 // May 1 2026 = Friday → offset 4 in Mon-first grid (Mon=0 … Sun=6)
-const MAY_START_OFFSET = 4
-const MAY_DAYS         = 31
-const DAY_TODAY        = 18   // 18 mai 2026
+const _now             = new Date()
+const DAY_TODAY        = _now.getDate()
+const CUR_MONTH        = _now.getMonth()        // 0-indexed
+const CUR_YEAR         = _now.getFullYear()
+const MAY_DAYS         = new Date(CUR_YEAR, CUR_MONTH + 1, 0).getDate()
+const _firstDayJS      = new Date(CUR_YEAR, CUR_MONTH, 1).getDay() // 0=Sun
+const MAY_START_OFFSET = _firstDayJS === 0 ? 6 : _firstDayJS - 1   // Mon-first grid
+const MONTH_LABEL_FR   = _now.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
+
+const STATUS_LABEL: Record<string, { label: string; cls: string }> = {
+  completed: { label: 'Terminée',   cls: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' },
+  confirmed: { label: 'Confirmée',  cls: 'bg-blue-500/10 text-blue-400 border-blue-500/20'         },
+  pending:   { label: 'En attente', cls: 'bg-orange-500/10 text-orange-400 border-orange-500/20'   },
+}
 
 function CalendarTab({ bookings, s }: { bookings: Booking[]; s: Stats }) {
+  const [selectedDay, setSelectedDay] = useState<string | null>(null)
+
   // ── Par jour ──
   type DayData = { completed: number; pending: number; revenue: number }
   const byDate: Record<string, DayData> = {}
@@ -1280,9 +1234,8 @@ function CalendarTab({ bookings, s }: { bookings: Booking[]; s: Stats }) {
   const upcomingNet = Math.round(upcomingCA - upcomingCA * URSSAF_RATE - upcoming.length * 15)
 
   // ── Projections ──
-  const daysElapsed = DAY_TODAY
-  const daysLeft    = MAY_DAYS - daysElapsed
-  const dailyNet    = s.netProfit / daysElapsed
+  const daysLeft    = MAY_DAYS - DAY_TODAY
+  const dailyNet    = s.netProfit / Math.max(1, DAY_TODAY)
   const trendProj   = Math.round(s.netProfit + dailyNet * daysLeft)
   const realistProj = Math.round(s.netProfit + upcomingNet + dailyNet * Math.max(0, daysLeft - upcoming.length))
   const optimistProj = Math.round(trendProj * 1.22)
@@ -1294,9 +1247,12 @@ function CalendarTab({ bookings, s }: { bookings: Booking[]; s: Stats }) {
   ]
   while (cells.length % 7 !== 0) cells.push(null)
 
-  // ── Historique complet (5 mois précédents + mai live) ──
-  const history = [...HISTORY_PREV, { month: 'Mai', year: 2026, net: s.netProfit, goalPct: s.goalPct, jobs: s.doneCount }]
-  const maxNet  = Math.max(...history.map(m => m.net), 1)
+  // ── Réservations du jour sélectionné ──
+  const selectedBookings = selectedDay ? bookings.filter(b => b.date === selectedDay) : []
+  const selectedDayNum   = selectedDay ? parseInt(selectedDay.slice(-2)) : 0
+
+  const dayKey = (day: number) =>
+    `${CUR_YEAR}-${String(CUR_MONTH + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
 
   return (
     <div className="space-y-4">
@@ -1304,12 +1260,11 @@ function CalendarTab({ bookings, s }: { bookings: Booking[]; s: Stats }) {
       {/* ── Bloc projection header ── */}
       <div className="card p-5">
         <div className="flex items-baseline gap-3 mb-4">
-          <h2 className="font-black text-white text-base">Projection — Mai 2026</h2>
-          <span className="text-sm text-neutral-600">J{DAY_TODAY}/31 · {daysLeft}j restants</span>
+          <h2 className="font-black text-white text-base capitalize">Projection — {MONTH_LABEL_FR}</h2>
+          <span className="text-sm text-neutral-600">J{DAY_TODAY}/{MAY_DAYS} · {daysLeft}j restants</span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          {/* Réalisé */}
           <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-4">
             <p className="text-[9px] font-black uppercase tracking-widest text-emerald-600 mb-2">Réalisé ce mois</p>
             <p className="text-2xl font-black text-emerald-400 font-mono">+{s.netProfit.toLocaleString('fr-FR')} €</p>
@@ -1318,7 +1273,6 @@ function CalendarTab({ bookings, s }: { bookings: Booking[]; s: Stats }) {
             </p>
           </div>
 
-          {/* À venir */}
           <div className="bg-orange-500/5 border border-orange-500/20 rounded-xl p-4">
             <p className="text-[9px] font-black uppercase tracking-widest text-orange-600 mb-2">Réservations à venir</p>
             <p className="text-2xl font-black text-orange-400 font-mono">~+{upcomingNet} €</p>
@@ -1327,12 +1281,11 @@ function CalendarTab({ bookings, s }: { bookings: Booking[]; s: Stats }) {
             </p>
           </div>
 
-          {/* Projections */}
           <div className="bg-neutral-800/60 rounded-xl p-4">
             <p className="text-[9px] font-black uppercase tracking-widest text-neutral-500 mb-3">Projections fin de mois</p>
             <div className="space-y-2">
               {[
-                { label: 'Tendance actuelle',   val: trendProj,    color: 'text-white'     },
+                { label: 'Tendance actuelle',   val: trendProj,    color: 'text-white'       },
                 { label: 'Réaliste (à venir)',  val: realistProj,  color: 'text-emerald-400' },
                 { label: 'Optimiste',           val: optimistProj, color: 'text-emerald-300' },
               ].map(row => (
@@ -1353,10 +1306,10 @@ function CalendarTab({ bookings, s }: { bookings: Booking[]; s: Stats }) {
       {/* ── KPIs du mois ── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
-          { label: 'Prestations',   val: `${s.doneCount}`,                      sub: 'mai',        color: 'text-white'       },
-          { label: 'CA encaissé',   val: `${s.caGross.toLocaleString('fr-FR')} €`, sub: 'brut',     color: 'text-white'       },
-          { label: 'Bénéfice net',  val: `+${s.netProfit.toLocaleString('fr-FR')} €`, sub: 'net',  color: 'text-emerald-400' },
-          { label: 'Meilleur jour', val: `${bestDayNum ? bestDayNum + ' mai' : '—'}`, sub: `+${bestDayRevenue} €`, color: 'text-white' },
+          { label: 'Prestations',   val: `${s.doneCount}`,                             sub: 'ce mois',  color: 'text-white'       },
+          { label: 'CA encaissé',   val: `${s.caGross.toLocaleString('fr-FR')} €`,     sub: 'brut',     color: 'text-white'       },
+          { label: 'Bénéfice net',  val: `+${s.netProfit.toLocaleString('fr-FR')} €`,  sub: 'net',      color: 'text-emerald-400' },
+          { label: 'Meilleur jour', val: bestDayNum ? `${bestDayNum}` : '—',           sub: bestDayNum ? `+${bestDayRevenue} €` : 'aucun', color: 'text-white' },
         ].map(k => (
           <div key={k.label} className="card p-4">
             <p className="label-xs mb-2">{k.label}</p>
@@ -1368,51 +1321,54 @@ function CalendarTab({ bookings, s }: { bookings: Booking[]; s: Stats }) {
 
       {/* ── Calendrier ── */}
       <div className="card p-5">
-        <p className="label-xs mb-4">Mai 2026</p>
+        <p className="label-xs mb-4 capitalize">{MONTH_LABEL_FR}</p>
 
-        {/* En-têtes jours */}
         <div className="grid grid-cols-7 mb-1">
           {['LUN','MAR','MER','JEU','VEN','SAM','DIM'].map(d => (
             <div key={d} className="text-center text-[9px] font-black text-neutral-600 py-1 tracking-wider">{d}</div>
           ))}
         </div>
 
-        {/* Cellules */}
         <div className="grid grid-cols-7 gap-1">
           {cells.map((day, idx) => {
             if (!day) return <div key={idx} />
 
-            const key  = `2026-05-${String(day).padStart(2, '0')}`
-            const d    = byDate[key]
+            const key      = dayKey(day)
+            const d        = byDate[key]
             const isToday  = day === DAY_TODAY
             const isPast   = day < DAY_TODAY
-            const hasJobs  = d?.completed > 0
-            const hasPend  = d?.pending > 0
+            const hasJobs  = (d?.completed ?? 0) > 0
+            const hasPend  = (d?.pending   ?? 0) > 0
+            const hasAny   = hasJobs || hasPend
             const count    = hasJobs ? d.completed : hasPend ? d.pending : 0
+            const isSelected = selectedDay === key
 
             return (
               <div
                 key={idx}
-                title={hasJobs ? `${d.completed} prestation${d.completed > 1 ? 's' : ''} · ${d.revenue} €` : hasPend ? `${d.pending} en attente` : ''}
+                onClick={() => hasAny && setSelectedDay(isSelected ? null : key)}
                 className={[
-                  'rounded-lg aspect-square flex flex-col items-center justify-center gap-0.5 cursor-default transition-all',
-                  isToday  ? 'bg-emerald-500/20 ring-1 ring-emerald-500/60' :
-                  hasJobs  ? 'bg-emerald-500/10 hover:bg-emerald-500/15' :
-                  hasPend  ? 'bg-orange-500/10 hover:bg-orange-500/15' :
-                  isPast   ? 'bg-neutral-800/20' : 'bg-transparent',
+                  'rounded-lg aspect-square flex flex-col items-center justify-center gap-0.5 transition-all',
+                  hasAny ? 'cursor-pointer' : 'cursor-default',
+                  isSelected ? 'ring-2 ring-white/40 scale-95' :
+                  isToday   ? 'bg-emerald-500/20 ring-1 ring-emerald-500/60' :
+                  hasJobs   ? 'bg-emerald-500/10 hover:bg-emerald-500/20' :
+                  hasPend   ? 'bg-orange-500/10 hover:bg-orange-500/20' :
+                  isPast    ? 'bg-neutral-800/20' : 'bg-transparent',
                 ].join(' ')}
               >
                 <span className={[
                   'text-[11px] font-mono',
-                  isToday ? 'font-black text-emerald-400' :
-                  hasJobs ? 'font-semibold text-neutral-300' :
-                  hasPend ? 'font-semibold text-orange-400' :
-                  isPast  ? 'text-neutral-700' : 'text-neutral-800',
+                  isSelected ? 'font-black text-white' :
+                  isToday   ? 'font-black text-emerald-400' :
+                  hasJobs   ? 'font-semibold text-neutral-300' :
+                  hasPend   ? 'font-semibold text-orange-400' :
+                  isPast    ? 'text-neutral-700' : 'text-neutral-800',
                 ].join(' ')}>
                   {day}
                 </span>
                 {count > 0 && (
-                  <span className={`text-[9px] font-black leading-none ${hasJobs ? 'text-emerald-400' : 'text-orange-400'}`}>
+                  <span className={`text-[9px] font-black leading-none ${isSelected ? 'text-white' : hasJobs ? 'text-emerald-400' : 'text-orange-400'}`}>
                     {count}
                   </span>
                 )}
@@ -1435,44 +1391,78 @@ function CalendarTab({ bookings, s }: { bookings: Booking[]; s: Stats }) {
             <div className="w-3 h-3 rounded ring-1 ring-emerald-500/60 bg-emerald-500/20" />
             <span className="text-[10px] text-neutral-600">Aujourd&apos;hui</span>
           </div>
+          <div className="flex items-center gap-1.5">
+            <div className="w-3 h-3 rounded ring-2 ring-white/40 bg-neutral-700" />
+            <span className="text-[10px] text-neutral-600">Sélectionné</span>
+          </div>
         </div>
       </div>
 
-      {/* ── Historique mensuel ── */}
-      <div className="card p-5">
-        <p className="label-xs mb-4">Historique mensuel · 6 derniers mois</p>
-        <div className="grid grid-cols-3 lg:grid-cols-6 gap-2">
-          {history.map((m, i) => {
-            const isCurrent = i === history.length - 1
-            const barH      = maxNet > 0 ? Math.max(4, Math.round((m.net / maxNet) * 56)) : 4
-            return (
-              <div
-                key={`${m.month}${m.year}`}
-                className={`rounded-xl p-3 flex flex-col items-center gap-2 ${isCurrent ? 'bg-emerald-500/10 border border-emerald-500/20' : 'bg-neutral-800/40'}`}
-              >
-                {/* Bar */}
-                <div className="w-full flex items-end justify-center h-14">
-                  <div
-                    className={`w-5 rounded-t-sm transition-all duration-700 ${isCurrent ? 'bg-emerald-500' : m.net > 0 ? 'bg-neutral-600' : 'bg-neutral-800'}`}
-                    style={{ height: m.net > 0 ? `${barH}px` : '4px' }}
-                  />
+      {/* ── Panneau détail jour sélectionné ── */}
+      {selectedDay && selectedBookings.length > 0 && (
+        <div className="card p-5 border-white/10">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-black text-white text-sm">
+              {selectedDayNum} {new Date(selectedDay + 'T12:00:00').toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}
+              <span className="text-neutral-500 font-normal ml-2">— {selectedBookings.length} réservation{selectedBookings.length > 1 ? 's' : ''}</span>
+            </h3>
+            <button onClick={() => setSelectedDay(null)} className="text-neutral-600 hover:text-white transition-colors">
+              <X size={16} />
+            </button>
+          </div>
+          <div className="space-y-3">
+            {selectedBookings.map(b => {
+              const st = STATUS_LABEL[b.status] ?? STATUS_LABEL.pending
+              return (
+                <div key={b.id} className="bg-neutral-900 border border-neutral-800 rounded-xl p-4 space-y-3">
+                  {/* Ligne principale */}
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="font-bold text-white text-sm">{b.clientName}</p>
+                      <p className="text-xs text-neutral-500 mt-0.5">
+                        {FORMULA_LABELS[b.formula]} · {b.vehicleSize === 'suv' ? 'SUV' : 'Standard'}
+                        {b.time ? ` · ${b.time}` : ''}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border ${st.cls}`}>
+                        {st.label}
+                      </span>
+                      <span className="font-black text-emerald-400 font-mono text-sm">{b.price} €</span>
+                    </div>
+                  </div>
+                  {/* Infos contact */}
+                  <div className="flex flex-wrap gap-x-4 gap-y-1.5 text-xs">
+                    {b.phone && (
+                      <a href={`tel:${b.phone}`} className="flex items-center gap-1.5 text-emerald-400 hover:text-emerald-300 font-semibold transition-colors">
+                        <span>📞</span>{b.phone}
+                      </a>
+                    )}
+                    {b.email && (
+                      <a href={`mailto:${b.email}`} className="flex items-center gap-1.5 text-blue-400 hover:text-blue-300 transition-colors">
+                        <span>✉</span>{b.email}
+                      </a>
+                    )}
+                    {b.address && (
+                      <span className="flex items-center gap-1.5 text-neutral-500">
+                        <span>📍</span>{b.address}
+                      </span>
+                    )}
+                    {b.assignedTo && (
+                      <span className="flex items-center gap-1.5 text-neutral-500">
+                        <span>👤</span>{b.assignedTo}
+                      </span>
+                    )}
+                  </div>
+                  {b.notes && (
+                    <p className="text-xs text-neutral-600 italic border-t border-neutral-800 pt-2">{b.notes}</p>
+                  )}
                 </div>
-                <div className="text-center">
-                  <p className={`text-[10px] font-black ${isCurrent ? 'text-emerald-400' : 'text-neutral-500'}`}>
-                    {m.month}
-                  </p>
-                  <p className="text-[9px] text-neutral-700">{m.year}</p>
-                  <p className={`text-[11px] font-black font-mono mt-1 ${isCurrent ? 'text-emerald-400' : m.net > 0 ? 'text-white' : 'text-neutral-700'}`}>
-                    {m.net > 0 ? `+${m.net.toLocaleString('fr-FR')} €` : '+0,00 €'}
-                  </p>
-                  <p className="text-[9px] text-neutral-600">{m.goalPct}% obj.</p>
-                  <p className="text-[9px] text-neutral-700">{m.jobs}v</p>
-                </div>
-              </div>
-            )
-          })}
+              )
+            })}
+          </div>
         </div>
-      </div>
+      )}
 
     </div>
   )

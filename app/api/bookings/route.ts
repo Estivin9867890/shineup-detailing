@@ -269,6 +269,11 @@ export async function POST(req: Request) {
       status:      'pending',
       price:       total,
       assignedTo:  '',
+      time:        time    || '',
+      phone:       phone   || '',
+      email:       email   || '',
+      address:     address || '',
+      notes:       notes   || '',
     }).catch(err => console.error('Appwrite save error:', err))
 
     return NextResponse.json({ ok: true })

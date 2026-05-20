@@ -32,6 +32,9 @@ export async function fetchBookings(): Promise<Booking[]> {
     formula: d.formula, vehicleSize: d.vehicleSize,
     source: d.source, status: d.status,
     price: d.price, assignedTo: d.assignedTo,
+    time: d.time || undefined, phone: d.phone || undefined,
+    email: d.email || undefined, address: d.address || undefined,
+    notes: d.notes || undefined,
   }))
 }
 
