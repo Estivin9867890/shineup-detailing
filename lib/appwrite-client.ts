@@ -43,6 +43,11 @@ export async function saveBooking(b: Booking): Promise<void> {
   await dbPost({ collection: COLS.bookings, id, data })
 }
 
+export async function updateBooking(b: Booking): Promise<void> {
+  const { id, ...data } = b
+  await dbPatch({ collection: COLS.bookings, id, data })
+}
+
 export async function removeBooking(id: string): Promise<void> {
   await dbDelete({ collection: COLS.bookings, id })
 }

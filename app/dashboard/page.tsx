@@ -12,7 +12,7 @@ import type {
   Booking, Expense, Supply, ClientProfile,
 } from '@/lib/dash-types'
 import {
-  fetchBookings, saveBooking, removeBooking,
+  fetchBookings, saveBooking, updateBooking, removeBooking,
   fetchExpenses, saveExpense, updateExpense, removeExpense,
   fetchSupplies, updateSupplyQty, updateSupply, saveSupply, removeSupply,
 } from '@/lib/appwrite-client'
@@ -271,6 +271,134 @@ function AddBookingModal({ onClose, onAdd }: {
           <button type="submit" disabled={!name.trim()}
             className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 disabled:bg-neutral-800 disabled:text-neutral-600 text-white font-bold rounded-xl text-sm transition-colors">
             Enregistrer le lavage
+          </button>
+        </form>
+      </div>
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MODALE — MODIFIER UNE RÉSERVATION
+// ═══════════════════════════════════════════════════════════════
+
+function EditBookingModal({ booking, onClose, onSave }: {
+  booking: Booking
+  onClose: () => void
+  onSave: (b: Booking) => void
+}) {
+  const [name,    setName]    = useState(booking.clientName)
+  const [phone,   setPhone]   = useState(booking.phone   ?? '')
+  const [address, setAddress] = useState(booking.address ?? '')
+  const [formula, setFormula] = useState<FormulaKey>(booking.formula)
+  const [size,    setSize]    = useState<VehicleSize>(booking.vehicleSize)
+  const [who,     setWho]     = useState(booking.assignedTo || 'Louis')
+  const [date,    setDate]    = useState(booking.date)
+  const [time,    setTime]    = useState(booking.time    ?? '')
+  const [status,  setStatus]  = useState(booking.status)
+  const [notes,   setNotes]   = useState(booking.notes   ?? '')
+
+  const price = FORMULA_PRICES[formula][size]
+
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!name.trim()) return
+    onSave({
+      ...booking,
+      clientName: name.trim(), formula, vehicleSize: size,
+      assignedTo: who, date, status, price,
+      time: time || undefined, phone: phone.trim() || undefined,
+      address: address.trim() || undefined, notes: notes.trim() || undefined,
+    })
+    onClose()
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div className="bg-neutral-900 border border-neutral-800 rounded-t-2xl sm:rounded-2xl w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-800 sticky top-0 bg-neutral-900 z-10">
+          <h3 className="font-black text-white">Modifier la réservation</h3>
+          <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-400 transition-colors"><X size={14} /></button>
+        </div>
+        <form onSubmit={submit} className="p-5 space-y-4">
+          <div className="space-y-3">
+            <p className="text-[10px] font-black uppercase tracking-widest text-neutral-600">Client</p>
+            <div>
+              <label className="label-sm">Nom *</label>
+              <input required value={name} onChange={e => setName(e.target.value)} className="inp" />
+            </div>
+            <div>
+              <label className="label-sm">Téléphone</label>
+              <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="06 12 34 56 78" className="inp" />
+            </div>
+            <div>
+              <label className="label-sm">Adresse</label>
+              <input value={address} onChange={e => setAddress(e.target.value)} placeholder="12 rue de la Paix, Brest" className="inp" />
+            </div>
+          </div>
+          <div className="space-y-3 pt-2 border-t border-neutral-800">
+            <p className="text-[10px] font-black uppercase tracking-widest text-neutral-600">Prestation</p>
+            <div>
+              <label className="label-sm">Formule</label>
+              <div className="grid grid-cols-3 gap-2">
+                {(['express', 'deep-clean', 'premium'] as FormulaKey[]).map(f => (
+                  <button key={f} type="button" onClick={() => setFormula(f)}
+                    className={`py-2.5 rounded-xl text-xs font-bold border transition-all ${formula === f ? 'bg-emerald-500/10 border-emerald-500 text-emerald-400' : 'bg-neutral-800 border-neutral-700 text-neutral-400'}`}>
+                    {f === 'express' ? 'Express' : f === 'deep-clean' ? 'Deep Clean' : 'Premium'}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label className="label-sm">Véhicule</label>
+              <div className="grid grid-cols-2 gap-2">
+                {(['standard', 'suv'] as VehicleSize[]).map(sv => (
+                  <button key={sv} type="button" onClick={() => setSize(sv)}
+                    className={`py-2.5 rounded-xl text-xs font-bold border transition-all ${size === sv ? 'bg-emerald-500/10 border-emerald-500 text-emerald-400' : 'bg-neutral-800 border-neutral-700 text-neutral-400'}`}>
+                    {sv === 'standard' ? 'Standard / Berline' : 'SUV / Monospace'}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label className="label-sm">Statut</label>
+              <div className="grid grid-cols-3 gap-2">
+                {(['completed', 'confirmed', 'pending'] as const).map(st => (
+                  <button key={st} type="button" onClick={() => setStatus(st)}
+                    className={`py-2 rounded-xl text-xs font-bold border transition-all ${status === st ? 'bg-emerald-500/10 border-emerald-500 text-emerald-400' : 'bg-neutral-800 border-neutral-700 text-neutral-400'}`}>
+                    {st === 'completed' ? 'Terminée' : st === 'confirmed' ? 'Confirmée' : 'En attente'}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              <div>
+                <label className="label-sm">Date</label>
+                <input type="date" value={date} onChange={e => setDate(e.target.value)} style={{ colorScheme: 'dark' }} className="inp" />
+              </div>
+              <div>
+                <label className="label-sm">Heure</label>
+                <input type="time" value={time} onChange={e => setTime(e.target.value)} style={{ colorScheme: 'dark' }} className="inp" />
+              </div>
+              <div>
+                <label className="label-sm">Technicien</label>
+                <select value={who} onChange={e => setWho(e.target.value)} className="inp">
+                  {TEAM.map(t => <option key={t} value={t}>{t}</option>)}
+                </select>
+              </div>
+            </div>
+            <div>
+              <label className="label-sm">Notes</label>
+              <input value={notes} onChange={e => setNotes(e.target.value)} placeholder="Détails supplémentaires…" className="inp" />
+            </div>
+          </div>
+          <div className="flex items-center justify-between bg-neutral-800/50 border border-neutral-700 rounded-xl px-4 py-3">
+            <span className="text-sm text-neutral-400">Prix calculé</span>
+            <span className="text-xl font-black text-emerald-400 font-mono">{price} €</span>
+          </div>
+          <button type="submit" disabled={!name.trim()}
+            className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 disabled:bg-neutral-800 disabled:text-neutral-600 text-white font-bold rounded-xl text-sm transition-colors">
+            Enregistrer les modifications
           </button>
         </form>
       </div>
@@ -765,10 +893,11 @@ function OverviewTab({ s }: { s: Stats }) {
 // ONGLET 2 — RÉSERVATIONS & CLIENTS
 // ═══════════════════════════════════════════════════════════════
 
-function BookingsTab({ bookings, onAdd, onDelete }: {
+function BookingsTab({ bookings, onAdd, onDelete, onEdit }: {
   bookings: Booking[]
   onAdd: () => void
   onDelete: (id: string) => void
+  onEdit: (b: Booking) => void
 }) {
   const [filter, setFilter] = useState<'all' | BookingStatus>('all')
 
@@ -832,10 +961,16 @@ function BookingsTab({ bookings, onAdd, onDelete }: {
                     <span className={`text-xs font-bold ${STATUS[b.status].cls}`}>{STATUS[b.status].label}</span>
                   </td>
                   <td className="px-3 py-3.5">
-                    <button onClick={() => onDelete(b.id)}
-                      className="w-6 h-6 flex items-center justify-center rounded text-neutral-700 hover:text-red-400 hover:bg-red-500/10 transition-colors">
-                      <Trash2 size={11} />
-                    </button>
+                    <div className="flex items-center gap-1">
+                      <button onClick={() => onEdit(b)}
+                        className="w-6 h-6 flex items-center justify-center rounded text-neutral-700 hover:text-blue-400 hover:bg-blue-500/10 transition-colors">
+                        <Pencil size={11} />
+                      </button>
+                      <button onClick={() => onDelete(b.id)}
+                        className="w-6 h-6 flex items-center justify-center rounded text-neutral-700 hover:text-red-400 hover:bg-red-500/10 transition-colors">
+                        <Trash2 size={11} />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -1179,7 +1314,7 @@ function ClientsTab({ bookings }: { bookings: Booking[] }) {
 // ONGLET 6 — MARKETING & ROI
 // ═══════════════════════════════════════════════════════════════
 
-function MarketingTab({ bookings, expenses, s, onAddAds }: { bookings: Booking[]; expenses: Expense[]; s: Stats; onAddAds: () => void }) {
+function MarketingTab({ bookings, expenses, s, onAddAds, onDeleteExp, onEditExp }: { bookings: Booking[]; expenses: Expense[]; s: Stats; onAddAds: () => void; onDeleteExp: (id: string) => void; onEditExp: (e: Expense) => void }) {
   const mktExp  = expenses.filter(e => e.category === 'marketing')
   const mktCost = mktExp.reduce((acc, e) => acc + e.amount, 0)
 
@@ -1235,14 +1370,24 @@ function MarketingTab({ bookings, expenses, s, onAddAds }: { bookings: Booking[]
         {/* Campagnes */}
         <div className="card p-5">
           <p className="label-xs mb-4">Détail des campagnes</p>
-          <div className="space-y-4">
+          <div className="space-y-3">
             {mktExp.map(e => {
               const pct = mktCost > 0 ? Math.round((e.amount / mktCost) * 100) : 0
               return (
-                <div key={e.id}>
-                  <div className="flex justify-between mb-1.5">
-                    <span className="text-sm font-semibold text-white">{e.label}</span>
-                    <span className="text-sm font-bold text-red-400 font-mono">−{e.amount} €</span>
+                <div key={e.id} className="group">
+                  <div className="flex items-center justify-between mb-1.5 gap-2">
+                    <span className="text-sm font-semibold text-white flex-1 min-w-0 truncate">{e.label}</span>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <span className="text-sm font-bold text-red-400 font-mono">−{e.amount} €</span>
+                      <button onClick={() => onEditExp(e)}
+                        className="w-6 h-6 flex items-center justify-center rounded text-neutral-700 hover:text-blue-400 hover:bg-blue-500/10 transition-colors opacity-0 group-hover:opacity-100">
+                        <Pencil size={10} />
+                      </button>
+                      <button onClick={() => onDeleteExp(e.id)}
+                        className="w-6 h-6 flex items-center justify-center rounded text-neutral-700 hover:text-red-400 hover:bg-red-500/10 transition-colors opacity-0 group-hover:opacity-100">
+                        <Trash2 size={10} />
+                      </button>
+                    </div>
                   </div>
                   <MiniBar pct={pct} color="bg-orange-500" />
                   <p className="text-[10px] text-neutral-700 mt-1">{pct}% du budget marketing</p>
@@ -2177,6 +2322,7 @@ export default function DashboardPage() {
   const [modalExp,     setModalExp]     = useState(false)
   const [modalDevis,   setModalDevis]   = useState(false)
   const [modalAds,     setModalAds]     = useState(false)
+  const [editingBook,  setEditingBook]  = useState<Booking | null>(null)
   const [editingExp,   setEditingExp]   = useState<Expense | null>(null)
   const [editingSup,   setEditingSup]   = useState<Supply  | null>(null)
   const suppliesReady = useRef(false)
@@ -2241,6 +2387,7 @@ export default function DashboardPage() {
       {modalExp   && <AddExpenseModal onClose={() => setModalExp(false)}   onAdd={e => { setExpenses(prev => [e, ...prev]); saveExpense(e).catch(console.error) }} />}
       {modalDevis && <DevisModal      onClose={() => setModalDevis(false)} />}
       {modalAds   && <AddAdsModal     onClose={() => setModalAds(false)}   onAdd={e => { setExpenses(prev => [e, ...prev]); saveExpense(e).catch(console.error) }} />}
+      {editingBook && <EditBookingModal booking={editingBook} onClose={() => setEditingBook(null)} onSave={b => { setBookings(prev => prev.map(x => x.id === b.id ? b : x)); updateBooking(b).catch(console.error); setEditingBook(null) }} />}
       {editingExp  && <EditExpenseModal expense={editingExp}  onClose={() => setEditingExp(null)}  onSave={e => { setExpenses(prev => prev.map(x => x.id === e.id ? e : x)); updateExpense(e).catch(console.error); setEditingExp(null) }} />}
       {editingSup  && <EditSupplyModal  supply={editingSup}   onClose={() => setEditingSup(null)}  onSave={s => { setSupplies(prev => prev.map(x => x.id === s.id ? s : x)); updateSupply(s).catch(console.error); setEditingSup(null) }} />}
 
@@ -2293,7 +2440,8 @@ export default function DashboardPage() {
         {tab === 'overview'  && <OverviewTab s={s} />}
         {tab === 'bookings'  && (
           <BookingsTab bookings={bookings} onAdd={() => setModalBook(true)}
-            onDelete={id => { setBookings(prev => prev.filter(b => b.id !== id)); removeBooking(id).catch(console.error) }} />
+            onDelete={id => { setBookings(prev => prev.filter(b => b.id !== id)); removeBooking(id).catch(console.error) }}
+            onEdit={b => setEditingBook(b)} />
         )}
         {tab === 'logistics' && (
           <LogisticsTab expenses={expenses} s={s} onAdd={() => setModalExp(true)}
@@ -2302,7 +2450,9 @@ export default function DashboardPage() {
         )}
         {tab === 'calendar'  && <CalendarTab bookings={bookings} s={s} />}
         {tab === 'clients'   && <ClientsTab bookings={bookings} />}
-        {tab === 'marketing' && <MarketingTab bookings={bookings} expenses={expenses} s={s} onAddAds={() => setModalAds(true)} />}
+        {tab === 'marketing' && <MarketingTab bookings={bookings} expenses={expenses} s={s} onAddAds={() => setModalAds(true)}
+            onDeleteExp={id => { setExpenses(prev => prev.filter(e => e.id !== id)); removeExpense(id).catch(console.error) }}
+            onEditExp={e => setEditingExp(e)} />}
         {tab === 'stocks'    && <StocksTab supplies={supplies} setSupplies={setSupplies}
             onDelete={id => { setSupplies(prev => prev.filter(s => s.id !== id)); removeSupply(id).catch(console.error) }}
             onEdit={s => setEditingSup(s)} />}
