@@ -26,11 +26,11 @@ export async function fetchBookings(): Promise<Booking[]> {
 
 export async function saveBooking(b: Booking): Promise<void> {
   const { id, ...data } = b
-  await db.createDocument(DB_ID, COLS.bookings, id, data)
+  await fetch('/api/db', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ collection: COLS.bookings, id, data }) }).then(r => { if (!r.ok) throw new Error('save failed') })
 }
 
 export async function removeBooking(id: string): Promise<void> {
-  await db.deleteDocument(DB_ID, COLS.bookings, id)
+  await fetch('/api/db', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ collection: COLS.bookings, id }) }).then(r => { if (!r.ok) throw new Error('delete failed') })
 }
 
 // ── Expenses ──────────────────────────────────────────────────
@@ -47,11 +47,11 @@ export async function fetchExpenses(): Promise<Expense[]> {
 
 export async function saveExpense(e: Expense): Promise<void> {
   const { id, ...data } = e
-  await db.createDocument(DB_ID, COLS.expenses, id, data)
+  await fetch('/api/db', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ collection: COLS.expenses, id, data }) }).then(r => { if (!r.ok) throw new Error('save failed') })
 }
 
 export async function removeExpense(id: string): Promise<void> {
-  await db.deleteDocument(DB_ID, COLS.expenses, id)
+  await fetch('/api/db', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ collection: COLS.expenses, id }) }).then(r => { if (!r.ok) throw new Error('delete failed') })
 }
 
 // ── Supplies ──────────────────────────────────────────────────
@@ -66,10 +66,10 @@ export async function fetchSupplies(): Promise<Supply[]> {
 }
 
 export async function updateSupplyQty(id: string, qty: number): Promise<void> {
-  await db.updateDocument(DB_ID, COLS.supplies, id, { qty })
+  await fetch('/api/db', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ collection: COLS.supplies, id, data: { qty } }) }).then(r => { if (!r.ok) throw new Error('update failed') })
 }
 
 export async function saveSupply(s: Supply): Promise<void> {
   const { id, ...data } = s
-  await db.createDocument(DB_ID, COLS.supplies, id, data)
+  await fetch('/api/db', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ collection: COLS.supplies, id, data }) }).then(r => { if (!r.ok) throw new Error('save failed') })
 }
