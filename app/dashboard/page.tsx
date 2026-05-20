@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import {
   LayoutDashboard, CalendarDays, Package, LogOut,
   Plus, X, Globe, Users, Trash2, BarChart2, ShoppingBag, Car, CalendarRange,
-  TrendingUp, Database, FileText, Search, AlertCircle,
+  TrendingUp, Database, FileText, Search, AlertCircle, Pencil, ArrowLeft, Phone, Mail, MapPin,
 } from 'lucide-react'
 import type {
   FormulaKey, VehicleSize, Source, BookingStatus, ExpenseCat,
@@ -13,8 +13,8 @@ import type {
 } from '@/lib/dash-types'
 import {
   fetchBookings, saveBooking, removeBooking,
-  fetchExpenses, saveExpense, removeExpense,
-  fetchSupplies, updateSupplyQty,
+  fetchExpenses, saveExpense, updateExpense, removeExpense,
+  fetchSupplies, updateSupplyQty, updateSupply, saveSupply, removeSupply,
 } from '@/lib/appwrite-client'
 
 // ═══════════════════════════════════════════════════════════════
@@ -370,6 +370,174 @@ function AddExpenseModal({ onClose, onAdd }: {
 }
 
 // ═══════════════════════════════════════════════════════════════
+// MODALE — MODIFIER UNE DÉPENSE
+// ═══════════════════════════════════════════════════════════════
+
+function EditExpenseModal({ expense, onClose, onSave }: {
+  expense: Expense
+  onClose: () => void
+  onSave: (e: Expense) => void
+}) {
+  const [cat,   setCat]   = useState<ExpenseCat>(expense.category)
+  const [label, setLbl]   = useState(expense.label)
+  const [amt,   setAmt]   = useState(String(expense.amount))
+  const [date,  setDate]  = useState(expense.date)
+
+  const parsed = parseFloat(amt)
+  const valid  = label.trim() && parsed > 0
+
+  const CATS: { v: ExpenseCat; label: string; emoji: string }[] = [
+    { v: 'marketing', label: 'Marketing', emoji: '📢' },
+    { v: 'material',  label: 'Matériel',  emoji: '🧽' },
+    { v: 'transport', label: 'Transport', emoji: '⛽' },
+  ]
+
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!valid) return
+    onSave({ ...expense, date, category: cat, label: label.trim(), amount: parsed })
+    onClose()
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div className="bg-neutral-900 border border-neutral-800 rounded-t-2xl sm:rounded-2xl w-full max-w-md shadow-2xl">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-800">
+          <h3 className="font-black text-white">Modifier la dépense</h3>
+          <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-400 transition-colors"><X size={14} /></button>
+        </div>
+        <form onSubmit={submit} className="p-5 space-y-4">
+          <div>
+            <label className="label-sm">Catégorie</label>
+            <div className="grid grid-cols-3 gap-2">
+              {CATS.map(c => (
+                <button key={c.v} type="button" onClick={() => setCat(c.v)}
+                  className={`py-2.5 rounded-xl text-xs font-bold border transition-all text-center ${cat === c.v ? 'bg-red-500/10 border-red-500 text-red-400' : 'bg-neutral-800 border-neutral-700 text-neutral-400 hover:border-neutral-600'}`}>
+                  <span className="block text-lg mb-0.5">{c.emoji}</span>{c.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <label className="label-sm">Description *</label>
+            <input required value={label} onChange={e => setLbl(e.target.value)} className="inp focus:border-red-500" />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="label-sm">Montant (€) *</label>
+              <input required type="number" min="0.01" step="0.01" value={amt} onChange={e => setAmt(e.target.value)} className="inp focus:border-red-500" />
+            </div>
+            <div>
+              <label className="label-sm">Date</label>
+              <input type="date" value={date} onChange={e => setDate(e.target.value)} style={{ colorScheme: 'dark' }} className="inp" />
+            </div>
+          </div>
+          <button type="submit" disabled={!valid}
+            className="w-full py-3 bg-red-600/80 hover:bg-red-500 disabled:bg-neutral-800 disabled:text-neutral-600 text-white font-bold rounded-xl text-sm transition-colors">
+            Enregistrer les modifications
+          </button>
+        </form>
+      </div>
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MODALE — MODIFIER UN STOCK
+// ═══════════════════════════════════════════════════════════════
+
+function EditSupplyModal({ supply, onClose, onSave }: {
+  supply: Supply
+  onClose: () => void
+  onSave: (s: Supply) => void
+}) {
+  const [name,       setName]       = useState(supply.name)
+  const [category,   setCategory]   = useState(supply.category)
+  const [unit,       setUnit]       = useState(supply.unit)
+  const [qty,        setQty]        = useState(String(supply.qty))
+  const [minQty,     setMinQty]     = useState(String(supply.minQty))
+  const [usePerJob,  setUsePerJob]  = useState(String(supply.usePerJob))
+  const [cost,       setCost]       = useState(String(supply.cost))
+
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault()
+    onSave({
+      ...supply,
+      name: name.trim(),
+      category,
+      unit: unit.trim(),
+      qty:       parseFloat(qty)       || 0,
+      minQty:    parseFloat(minQty)    || 0,
+      usePerJob: parseFloat(usePerJob) || 0,
+      cost:      parseFloat(cost)      || 0,
+    })
+    onClose()
+  }
+
+  const CATS = [
+    { v: 'product' as const,    label: 'Produit'     },
+    { v: 'consumable' as const, label: 'Consommable' },
+    { v: 'equipment' as const,  label: 'Équipement'  },
+  ]
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div className="bg-neutral-900 border border-neutral-800 rounded-t-2xl sm:rounded-2xl w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-800 sticky top-0 bg-neutral-900 z-10">
+          <h3 className="font-black text-white">Modifier le stock</h3>
+          <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-400 transition-colors"><X size={14} /></button>
+        </div>
+        <form onSubmit={submit} className="p-5 space-y-4">
+          <div>
+            <label className="label-sm">Nom *</label>
+            <input required value={name} onChange={e => setName(e.target.value)} className="inp" />
+          </div>
+          <div>
+            <label className="label-sm">Catégorie</label>
+            <div className="grid grid-cols-3 gap-2">
+              {CATS.map(c => (
+                <button key={c.v} type="button" onClick={() => setCategory(c.v)}
+                  className={`py-2 rounded-xl text-xs font-bold border transition-all ${category === c.v ? 'bg-emerald-500/10 border-emerald-500 text-emerald-400' : 'bg-neutral-800 border-neutral-700 text-neutral-400'}`}>
+                  {c.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="label-sm">Unité</label>
+              <input value={unit} onChange={e => setUnit(e.target.value)} placeholder="L, pcs, kg…" className="inp" />
+            </div>
+            <div>
+              <label className="label-sm">Quantité actuelle</label>
+              <input type="number" min="0" step="0.01" value={qty} onChange={e => setQty(e.target.value)} className="inp" />
+            </div>
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            <div>
+              <label className="label-sm">Seuil min.</label>
+              <input type="number" min="0" step="0.01" value={minQty} onChange={e => setMinQty(e.target.value)} className="inp" />
+            </div>
+            <div>
+              <label className="label-sm">Conso/job</label>
+              <input type="number" min="0" step="0.01" value={usePerJob} onChange={e => setUsePerJob(e.target.value)} className="inp" />
+            </div>
+            <div>
+              <label className="label-sm">Coût (€)</label>
+              <input type="number" min="0" step="0.01" value={cost} onChange={e => setCost(e.target.value)} className="inp" />
+            </div>
+          </div>
+          <button type="submit" disabled={!name.trim()}
+            className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 disabled:bg-neutral-800 disabled:text-neutral-600 text-white font-bold rounded-xl text-sm transition-colors">
+            Enregistrer les modifications
+          </button>
+        </form>
+      </div>
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════
 // MODALE — NOUVELLE CAMPAGNE ADS
 // ═══════════════════════════════════════════════════════════════
 
@@ -696,11 +864,12 @@ const CAT_CFG: Record<ExpenseCat, { label: string; icon: React.ReactNode; cls: s
   transport: { label: 'Transport',               icon: <Car size={14} />,         cls: 'text-purple-400', bg: 'bg-purple-500/10' },
 }
 
-function LogisticsTab({ expenses, s, onAdd, onDelete }: {
+function LogisticsTab({ expenses, s, onAdd, onDelete, onEdit }: {
   expenses: Expense[]
   s: Stats
   onAdd: () => void
   onDelete: (id: string) => void
+  onEdit: (e: Expense) => void
 }) {
   const rows = [...expenses].sort((a, b) => b.date.localeCompare(a.date))
 
@@ -773,10 +942,16 @@ function LogisticsTab({ expenses, s, onAdd, onDelete }: {
                     <td className="px-5 py-3.5 text-neutral-400">{ex.label}</td>
                     <td className="px-5 py-3.5 text-right font-black text-red-400 font-mono">−{ex.amount} €</td>
                     <td className="px-3 py-3.5">
-                      <button onClick={() => onDelete(ex.id)}
-                        className="w-6 h-6 flex items-center justify-center rounded text-neutral-700 hover:text-red-400 hover:bg-red-500/10 transition-colors">
-                        <Trash2 size={11} />
-                      </button>
+                      <div className="flex items-center gap-1">
+                        <button onClick={() => onEdit(ex)}
+                          className="w-6 h-6 flex items-center justify-center rounded text-neutral-700 hover:text-blue-400 hover:bg-blue-500/10 transition-colors">
+                          <Pencil size={11} />
+                        </button>
+                        <button onClick={() => onDelete(ex.id)}
+                          className="w-6 h-6 flex items-center justify-center rounded text-neutral-700 hover:text-red-400 hover:bg-red-500/10 transition-colors">
+                          <Trash2 size={11} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 )
@@ -1134,9 +1309,11 @@ const CAT_SUPPLY: Record<Supply['category'], { label: string; color: string; bg:
   equipment:  { label: 'Équipement',  color: 'text-purple-400', bg: 'bg-purple-500/10' },
 }
 
-function StocksTab({ supplies, setSupplies }: {
+function StocksTab({ supplies, setSupplies, onDelete, onEdit }: {
   supplies: Supply[]
   setSupplies: React.Dispatch<React.SetStateAction<Supply[]>>
+  onDelete: (id: string) => void
+  onEdit: (s: Supply) => void
 }) {
   const lowStock    = supplies.filter(s => s.qty < s.minQty)
   const stockValue  = supplies.reduce((a, s) => a + s.qty * s.cost, 0)
@@ -1218,6 +1395,14 @@ function StocksTab({ supplies, setSupplies }: {
                   className="flex-1 py-1.5 rounded-lg text-[11px] font-bold bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 transition-colors">
                   Réappro.
                 </button>
+                <button onClick={() => onEdit(s)}
+                  className="w-7 h-7 flex items-center justify-center rounded-lg bg-neutral-800 hover:bg-blue-500/20 text-neutral-600 hover:text-blue-400 transition-colors shrink-0">
+                  <Pencil size={11} />
+                </button>
+                <button onClick={() => onDelete(s.id)}
+                  className="w-7 h-7 flex items-center justify-center rounded-lg bg-neutral-800 hover:bg-red-500/20 text-neutral-600 hover:text-red-400 transition-colors shrink-0">
+                  <Trash2 size={11} />
+                </button>
               </div>
             </div>
           )
@@ -1247,8 +1432,138 @@ const STATUS_LABEL: Record<string, { label: string; cls: string }> = {
   pending:   { label: 'En attente', cls: 'bg-orange-500/10 text-orange-400 border-orange-500/20'   },
 }
 
+function DayModal({ date, bookings, onClose, onSelect }: {
+  date: string; bookings: Booking[]; onClose: () => void; onSelect: (b: Booking) => void
+}) {
+  const label = new Date(date + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+  return (
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4" onClick={onClose}>
+      <div className="bg-neutral-900 border border-neutral-800 rounded-2xl w-full max-w-md shadow-2xl" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-800">
+          <div>
+            <p className="font-black text-white capitalize">{label}</p>
+            <p className="text-xs text-neutral-500 mt-0.5">{bookings.length} réservation{bookings.length > 1 ? 's' : ''}</p>
+          </div>
+          <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-400 transition-colors"><X size={14} /></button>
+        </div>
+        <div className="p-4 space-y-2 max-h-[60vh] overflow-y-auto">
+          {bookings.map(b => {
+            const st = STATUS_LABEL[b.status] ?? STATUS_LABEL.pending
+            return (
+              <button key={b.id} onClick={() => onSelect(b)}
+                className="w-full text-left bg-neutral-800/50 hover:bg-neutral-800 border border-neutral-700 hover:border-neutral-600 rounded-xl p-4 transition-all group">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="font-bold text-white text-sm group-hover:text-emerald-400 transition-colors">{b.clientName}</p>
+                    <p className="text-xs text-neutral-500 mt-0.5">
+                      {FORMULA_LABELS[b.formula]} · {b.vehicleSize === 'suv' ? 'SUV' : 'Standard'}
+                      {b.time ? ` · ${b.time}` : ''}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border ${st.cls}`}>{st.label}</span>
+                    <span className="font-black text-emerald-400 font-mono text-sm">{b.price} €</span>
+                  </div>
+                </div>
+              </button>
+            )
+          })}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function BookingDetailModal({ booking, onClose, onBack }: {
+  booking: Booking; onClose: () => void; onBack: () => void
+}) {
+  const st = STATUS_LABEL[booking.status] ?? STATUS_LABEL.pending
+  const dateLabel = new Date(booking.date + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+  return (
+    <div className="fixed inset-0 z-60 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4" onClick={onClose}>
+      <div className="bg-neutral-900 border border-neutral-800 rounded-2xl w-full max-w-md shadow-2xl" onClick={e => e.stopPropagation()}>
+        {/* Header */}
+        <div className="flex items-center gap-3 px-5 py-4 border-b border-neutral-800">
+          <button onClick={onBack} className="w-7 h-7 flex items-center justify-center rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-400 transition-colors"><ArrowLeft size={14} /></button>
+          <div className="flex-1 min-w-0">
+            <p className="font-black text-white truncate">{booking.clientName}</p>
+          </div>
+          <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border shrink-0 ${st.cls}`}>{st.label}</span>
+          <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-400 transition-colors"><X size={14} /></button>
+        </div>
+        {/* Body */}
+        <div className="p-5 space-y-4 max-h-[70vh] overflow-y-auto">
+          {/* Prestation */}
+          <div className="bg-neutral-800/50 rounded-xl p-4 space-y-2">
+            <p className="text-[9px] font-black uppercase tracking-widest text-neutral-600 mb-3">Prestation</p>
+            <div className="flex justify-between">
+              <span className="text-xs text-neutral-500">Formule</span>
+              <span className="text-xs font-bold text-white">{FORMULA_LABELS[booking.formula]}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-xs text-neutral-500">Véhicule</span>
+              <span className="text-xs font-bold text-white">{booking.vehicleSize === 'suv' ? 'SUV / Monospace' : 'Standard / Berline'}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-xs text-neutral-500">Date</span>
+              <span className="text-xs font-bold text-white capitalize">{dateLabel}{booking.time ? ` · ${booking.time}` : ''}</span>
+            </div>
+            <div className="flex justify-between pt-2 border-t border-neutral-700">
+              <span className="text-xs text-neutral-500">Prix</span>
+              <span className="text-sm font-black text-emerald-400 font-mono">{booking.price} €</span>
+            </div>
+            {booking.assignedTo && (
+              <div className="flex justify-between">
+                <span className="text-xs text-neutral-500">Technicien</span>
+                <span className="text-xs font-bold text-white">{booking.assignedTo}</span>
+              </div>
+            )}
+          </div>
+          {/* Contact */}
+          {(booking.phone || booking.email || booking.address) && (
+            <div className="bg-neutral-800/50 rounded-xl p-4 space-y-3">
+              <p className="text-[9px] font-black uppercase tracking-widest text-neutral-600">Contact</p>
+              {booking.phone && (
+                <a href={`tel:${booking.phone}`} className="flex items-center gap-3 group">
+                  <div className="w-7 h-7 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0"><Phone size={12} className="text-emerald-400" /></div>
+                  <span className="text-sm font-semibold text-emerald-400 group-hover:text-emerald-300 transition-colors">{booking.phone}</span>
+                </a>
+              )}
+              {booking.email && (
+                <a href={`mailto:${booking.email}`} className="flex items-center gap-3 group">
+                  <div className="w-7 h-7 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0"><Mail size={12} className="text-blue-400" /></div>
+                  <span className="text-sm text-blue-400 group-hover:text-blue-300 transition-colors">{booking.email}</span>
+                </a>
+              )}
+              {booking.address && (
+                <div className="flex items-center gap-3">
+                  <div className="w-7 h-7 rounded-lg bg-neutral-700 flex items-center justify-center shrink-0"><MapPin size={12} className="text-neutral-400" /></div>
+                  <span className="text-sm text-neutral-400">{booking.address}</span>
+                </div>
+              )}
+            </div>
+          )}
+          {/* Notes */}
+          {booking.notes && (
+            <div className="bg-neutral-800/50 rounded-xl p-4">
+              <p className="text-[9px] font-black uppercase tracking-widest text-neutral-600 mb-2">Notes</p>
+              <p className="text-sm text-neutral-400 italic">{booking.notes}</p>
+            </div>
+          )}
+          {/* Source */}
+          <div className="flex justify-between text-xs text-neutral-700">
+            <span>Source : {booking.source === 'web' ? 'Site web' : 'Manuel'}</span>
+            <span>ID : {booking.id}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function CalendarTab({ bookings, s }: { bookings: Booking[]; s: Stats }) {
   const [selectedDay, setSelectedDay] = useState<string | null>(null)
+  const [detailBooking, setDetailBooking] = useState<Booking | null>(null)
 
   // ── Par jour ──
   type DayData = { completed: number; pending: number; revenue: number }
@@ -1384,29 +1699,27 @@ function CalendarTab({ bookings, s }: { bookings: Booking[]; s: Stats }) {
             return (
               <div
                 key={idx}
-                onClick={() => hasAny && setSelectedDay(isSelected ? null : key)}
+                onClick={() => hasAny && setSelectedDay(key)}
                 className={[
                   'rounded-lg aspect-square flex flex-col items-center justify-center gap-0.5 transition-all',
                   hasAny ? 'cursor-pointer' : 'cursor-default',
-                  isSelected ? 'ring-2 ring-white/40 scale-95' :
-                  isToday   ? 'bg-emerald-500/20 ring-1 ring-emerald-500/60' :
-                  hasJobs   ? 'bg-emerald-500/10 hover:bg-emerald-500/20' :
-                  hasPend   ? 'bg-orange-500/10 hover:bg-orange-500/20' :
-                  isPast    ? 'bg-neutral-800/20' : 'bg-transparent',
+                  isToday ? 'bg-emerald-500/20 ring-1 ring-emerald-500/60' :
+                  hasJobs ? 'bg-emerald-500/10 hover:bg-emerald-500/20' :
+                  hasPend ? 'bg-orange-500/10 hover:bg-orange-500/20' :
+                  isPast  ? 'bg-neutral-800/20' : 'bg-transparent',
                 ].join(' ')}
               >
                 <span className={[
                   'text-[11px] font-mono',
-                  isSelected ? 'font-black text-white' :
-                  isToday   ? 'font-black text-emerald-400' :
-                  hasJobs   ? 'font-semibold text-neutral-300' :
-                  hasPend   ? 'font-semibold text-orange-400' :
-                  isPast    ? 'text-neutral-700' : 'text-neutral-800',
+                  isToday ? 'font-black text-emerald-400' :
+                  hasJobs ? 'font-semibold text-neutral-300' :
+                  hasPend ? 'font-semibold text-orange-400' :
+                  isPast  ? 'text-neutral-700' : 'text-neutral-800',
                 ].join(' ')}>
                   {day}
                 </span>
                 {count > 0 && (
-                  <span className={`text-[9px] font-black leading-none ${isSelected ? 'text-white' : hasJobs ? 'text-emerald-400' : 'text-orange-400'}`}>
+                  <span className={`text-[9px] font-black leading-none ${hasJobs ? 'text-emerald-400' : 'text-orange-400'}`}>
                     {count}
                   </span>
                 )}
@@ -1419,87 +1732,34 @@ function CalendarTab({ bookings, s }: { bookings: Booking[]; s: Stats }) {
         <div className="flex flex-wrap gap-4 mt-4 pt-4 border-t border-neutral-800">
           <div className="flex items-center gap-1.5">
             <div className="w-3 h-3 rounded bg-emerald-500/30" />
-            <span className="text-[10px] text-neutral-600">Prestation terminée</span>
+            <span className="text-[10px] text-neutral-600">Prestation terminée — cliquer pour détails</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-3 h-3 rounded bg-orange-500/30" />
-            <span className="text-[10px] text-neutral-600">Réservation à venir</span>
+            <span className="text-[10px] text-neutral-600">Réservation à venir — cliquer pour détails</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-3 h-3 rounded ring-1 ring-emerald-500/60 bg-emerald-500/20" />
             <span className="text-[10px] text-neutral-600">Aujourd&apos;hui</span>
           </div>
-          <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded ring-2 ring-white/40 bg-neutral-700" />
-            <span className="text-[10px] text-neutral-600">Sélectionné</span>
-          </div>
         </div>
       </div>
 
-      {/* ── Panneau détail jour sélectionné ── */}
-      {selectedDay && selectedBookings.length > 0 && (
-        <div className="card p-5 border-white/10">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-black text-white text-sm">
-              {selectedDayNum} {new Date(selectedDay + 'T12:00:00').toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}
-              <span className="text-neutral-500 font-normal ml-2">— {selectedBookings.length} réservation{selectedBookings.length > 1 ? 's' : ''}</span>
-            </h3>
-            <button onClick={() => setSelectedDay(null)} className="text-neutral-600 hover:text-white transition-colors">
-              <X size={16} />
-            </button>
-          </div>
-          <div className="space-y-3">
-            {selectedBookings.map(b => {
-              const st = STATUS_LABEL[b.status] ?? STATUS_LABEL.pending
-              return (
-                <div key={b.id} className="bg-neutral-900 border border-neutral-800 rounded-xl p-4 space-y-3">
-                  {/* Ligne principale */}
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="font-bold text-white text-sm">{b.clientName}</p>
-                      <p className="text-xs text-neutral-500 mt-0.5">
-                        {FORMULA_LABELS[b.formula]} · {b.vehicleSize === 'suv' ? 'SUV' : 'Standard'}
-                        {b.time ? ` · ${b.time}` : ''}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border ${st.cls}`}>
-                        {st.label}
-                      </span>
-                      <span className="font-black text-emerald-400 font-mono text-sm">{b.price} €</span>
-                    </div>
-                  </div>
-                  {/* Infos contact */}
-                  <div className="flex flex-wrap gap-x-4 gap-y-1.5 text-xs">
-                    {b.phone && (
-                      <a href={`tel:${b.phone}`} className="flex items-center gap-1.5 text-emerald-400 hover:text-emerald-300 font-semibold transition-colors">
-                        <span>📞</span>{b.phone}
-                      </a>
-                    )}
-                    {b.email && (
-                      <a href={`mailto:${b.email}`} className="flex items-center gap-1.5 text-blue-400 hover:text-blue-300 transition-colors">
-                        <span>✉</span>{b.email}
-                      </a>
-                    )}
-                    {b.address && (
-                      <span className="flex items-center gap-1.5 text-neutral-500">
-                        <span>📍</span>{b.address}
-                      </span>
-                    )}
-                    {b.assignedTo && (
-                      <span className="flex items-center gap-1.5 text-neutral-500">
-                        <span>👤</span>{b.assignedTo}
-                      </span>
-                    )}
-                  </div>
-                  {b.notes && (
-                    <p className="text-xs text-neutral-600 italic border-t border-neutral-800 pt-2">{b.notes}</p>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-        </div>
+      {/* ── Modals calendrier ── */}
+      {selectedDay && !detailBooking && (
+        <DayModal
+          date={selectedDay}
+          bookings={bookings.filter(b => b.date === selectedDay)}
+          onClose={() => setSelectedDay(null)}
+          onSelect={b => setDetailBooking(b)}
+        />
+      )}
+      {detailBooking && (
+        <BookingDetailModal
+          booking={detailBooking}
+          onClose={() => { setDetailBooking(null); setSelectedDay(null) }}
+          onBack={() => setDetailBooking(null)}
+        />
       )}
 
     </div>
@@ -1913,10 +2173,12 @@ export default function DashboardPage() {
   const [expenses,   setExpenses]  = useState<Expense[]>([])
   const [supplies,   setSupplies]  = useState<Supply[]>([])
   const [loading,    setLoading]   = useState(true)
-  const [modalBook,  setModalBook] = useState(false)
-  const [modalExp,   setModalExp]  = useState(false)
-  const [modalDevis, setModalDevis] = useState(false)
-  const [modalAds,   setModalAds]  = useState(false)
+  const [modalBook,    setModalBook]    = useState(false)
+  const [modalExp,     setModalExp]     = useState(false)
+  const [modalDevis,   setModalDevis]   = useState(false)
+  const [modalAds,     setModalAds]     = useState(false)
+  const [editingExp,   setEditingExp]   = useState<Expense | null>(null)
+  const [editingSup,   setEditingSup]   = useState<Supply  | null>(null)
   const suppliesReady = useRef(false)
 
   // Chargement initial depuis Appwrite
@@ -1979,6 +2241,8 @@ export default function DashboardPage() {
       {modalExp   && <AddExpenseModal onClose={() => setModalExp(false)}   onAdd={e => { setExpenses(prev => [e, ...prev]); saveExpense(e).catch(console.error) }} />}
       {modalDevis && <DevisModal      onClose={() => setModalDevis(false)} />}
       {modalAds   && <AddAdsModal     onClose={() => setModalAds(false)}   onAdd={e => { setExpenses(prev => [e, ...prev]); saveExpense(e).catch(console.error) }} />}
+      {editingExp  && <EditExpenseModal expense={editingExp}  onClose={() => setEditingExp(null)}  onSave={e => { setExpenses(prev => prev.map(x => x.id === e.id ? e : x)); updateExpense(e).catch(console.error); setEditingExp(null) }} />}
+      {editingSup  && <EditSupplyModal  supply={editingSup}   onClose={() => setEditingSup(null)}  onSave={s => { setSupplies(prev => prev.map(x => x.id === s.id ? s : x)); updateSupply(s).catch(console.error); setEditingSup(null) }} />}
 
       {/* ── Header ── */}
       <header className="sticky top-0 z-40 bg-[#0d0d0d]/90 backdrop-blur-xl border-b border-neutral-800">
@@ -2033,12 +2297,15 @@ export default function DashboardPage() {
         )}
         {tab === 'logistics' && (
           <LogisticsTab expenses={expenses} s={s} onAdd={() => setModalExp(true)}
-            onDelete={id => { setExpenses(prev => prev.filter(e => e.id !== id)); removeExpense(id).catch(console.error) }} />
+            onDelete={id => { setExpenses(prev => prev.filter(e => e.id !== id)); removeExpense(id).catch(console.error) }}
+            onEdit={e => setEditingExp(e)} />
         )}
         {tab === 'calendar'  && <CalendarTab bookings={bookings} s={s} />}
         {tab === 'clients'   && <ClientsTab bookings={bookings} />}
         {tab === 'marketing' && <MarketingTab bookings={bookings} expenses={expenses} s={s} onAddAds={() => setModalAds(true)} />}
-        {tab === 'stocks'    && <StocksTab supplies={supplies} setSupplies={setSupplies} />}
+        {tab === 'stocks'    && <StocksTab supplies={supplies} setSupplies={setSupplies}
+            onDelete={id => { setSupplies(prev => prev.filter(s => s.id !== id)); removeSupply(id).catch(console.error) }}
+            onEdit={s => setEditingSup(s)} />}
         {tab === 'stats'     && <StatsTab bookings={bookings} expenses={expenses} />}
       </main>
     </div>

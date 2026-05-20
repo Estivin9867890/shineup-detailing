@@ -62,6 +62,11 @@ export async function saveExpense(e: Expense): Promise<void> {
   await dbPost({ collection: COLS.expenses, id, data })
 }
 
+export async function updateExpense(e: Expense): Promise<void> {
+  const { id, ...data } = e
+  await dbPatch({ collection: COLS.expenses, id, data })
+}
+
 export async function removeExpense(id: string): Promise<void> {
   await dbDelete({ collection: COLS.expenses, id })
 }
@@ -81,7 +86,16 @@ export async function updateSupplyQty(id: string, qty: number): Promise<void> {
   await dbPatch({ collection: COLS.supplies, id, data: { qty } })
 }
 
+export async function updateSupply(s: Supply): Promise<void> {
+  const { id, ...data } = s
+  await dbPatch({ collection: COLS.supplies, id, data })
+}
+
 export async function saveSupply(s: Supply): Promise<void> {
   const { id, ...data } = s
   await dbPost({ collection: COLS.supplies, id, data })
+}
+
+export async function removeSupply(id: string): Promise<void> {
+  await dbDelete({ collection: COLS.supplies, id })
 }
