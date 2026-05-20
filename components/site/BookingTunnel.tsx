@@ -31,31 +31,26 @@ const VEHICLE_SIZES = [
 const FORMULA_ICONS = { express: Zap, 'deep-clean': Droplets, premium: Star }
 
 function getAvailableSlots(dateStr: string): string[] {
-  const date = new Date(dateStr)
+  const date = new Date(dateStr + 'T12:00:00')
   const day = date.getDay()
   const isWeekend = day === 0 || day === 6
-  // Mock: some slots already booked
-  const bookedSlots: Record<string, string[]> = {
-    '2026-05-18': ['10:00', '14:00'],
-    '2026-05-19': [],
-    '2026-05-20': ['19:00'],
-  }
-  const booked = bookedSlots[dateStr] ?? []
-
   const slots = isWeekend
     ? ['09:00', '10:00', '11:00', '12:00', '14:00', '15:00', '16:00', '17:00']
     : ['18:00', '18:30', '19:00', '19:30', '20:00']
-
-  return slots.filter(s => !booked.includes(s))
+  return slots
 }
 
 function MiniCalendar({ selected, onSelect }: { selected: string; onSelect: (d: string) => void }) {
-  const today = new Date('2026-05-17')
-  const [viewMonth, setViewMonth] = useState(today.getMonth())
-  const [viewYear, setViewYear] = useState(today.getFullYear())
+  const today = useMemo(() => { const d = new Date(); d.setHours(0, 0, 0, 0); return d }, [])
+  const todayStr = useMemo(() => (
+    `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
+  ), [today])
 
-  const monthName = new Date(viewYear, viewMonth, 1).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
-  const firstDay = (new Date(viewYear, viewMonth, 1).getDay() + 6) % 7 // Mon=0
+  const [viewMonth, setViewMonth] = useState(today.getMonth())
+  const [viewYear, setViewYear]   = useState(today.getFullYear())
+
+  const monthName   = new Date(viewYear, viewMonth, 1).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
+  const firstDay    = (new Date(viewYear, viewMonth, 1).getDay() + 6) % 7
   const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate()
 
   const days = useMemo(() => {
@@ -63,13 +58,13 @@ function MiniCalendar({ selected, onSelect }: { selected: string; onSelect: (d: 
     for (let i = 0; i < firstDay; i++) cells.push({ date: '', day: 0, disabled: true, isToday: false })
     for (let d = 1; d <= daysInMonth; d++) {
       const dateStr = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`
-      const dateObj = new Date(dateStr)
-      const isPast = dateObj <= today
-      const isToday = dateStr === '2026-05-17'
+      const dateObj = new Date(dateStr + 'T12:00:00')
+      const isPast  = dateObj < today
+      const isToday = dateStr === todayStr
       cells.push({ date: dateStr, day: d, disabled: isPast, isToday })
     }
     return cells
-  }, [viewMonth, viewYear, firstDay, daysInMonth])
+  }, [viewMonth, viewYear, firstDay, daysInMonth, today, todayStr])
 
   const prevMonth = () => {
     if (viewMonth === 0) { setViewMonth(11); setViewYear(y => y - 1) }
@@ -123,7 +118,9 @@ function MiniCalendar({ selected, onSelect }: { selected: string; onSelect: (d: 
 
 export default function BookingTunnel({ onClose, initialFormula }: BookingTunnelProps) {
   const [step, setStep] = useState(initialFormula ? 2 : 1)
-  const [submitted, setSubmitted] = useState(false)
+  const [submitted, setSubmitted]   = useState(false)
+  const [loading, setLoading]       = useState(false)
+  const [submitError, setSubmitError] = useState(false)
   const [form, setForm] = useState<BookingForm>({
     formula: initialFormula ?? null,
     vehicleSize: null,
@@ -146,9 +143,22 @@ export default function BookingTunnel({ onClose, initialFormula }: BookingTunnel
 
   const availableSlots = form.date ? getAvailableSlots(form.date) : []
 
-  const handleSubmit = () => {
-    // In production: POST to /api/bookings
-    setSubmitted(true)
+  const handleSubmit = async () => {
+    setLoading(true)
+    setSubmitError(false)
+    try {
+      const res = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      })
+      if (!res.ok) throw new Error('api_error')
+      setSubmitted(true)
+    } catch {
+      setSubmitError(true)
+    } finally {
+      setLoading(false)
+    }
   }
 
   if (submitted) {
@@ -470,12 +480,21 @@ export default function BookingTunnel({ onClose, initialFormula }: BookingTunnel
             </div>
           )}
 
+          {/* Error banner */}
+          {submitError && (
+            <div className="mt-5 p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-sm text-red-400 text-center">
+              Une erreur s&apos;est produite. Réessayez ou contactez-nous directement au{' '}
+              <a href="tel:+33647805116" className="font-bold underline">06 47 80 51 16</a>
+            </div>
+          )}
+
           {/* Navigation */}
-          <div className={['flex mt-6 gap-3', step > 1 ? 'justify-between' : 'justify-end'].join(' ')}>
+          <div className={['flex mt-5 gap-3', step > 1 ? 'justify-between' : 'justify-end'].join(' ')}>
             {step > 1 && (
               <button
                 onClick={() => setStep(s => s - 1)}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-700 text-slate-300 hover:border-slate-500 hover:text-white transition-all text-sm font-medium"
+                disabled={loading}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-700 text-slate-300 hover:border-slate-500 hover:text-white transition-all text-sm font-medium disabled:opacity-40"
               >
                 <ChevronLeft size={16} /> Retour
               </button>
@@ -495,16 +514,25 @@ export default function BookingTunnel({ onClose, initialFormula }: BookingTunnel
               </button>
             ) : (
               <button
-                disabled={!canNext}
+                disabled={!canNext || loading}
                 onClick={handleSubmit}
                 className={[
                   'flex items-center gap-2 px-6 py-2.5 rounded-xl font-semibold text-sm transition-all',
-                  canNext
+                  canNext && !loading
                     ? 'bg-emerald-600 hover:bg-emerald-500 text-white'
                     : 'bg-slate-800 text-slate-600 cursor-not-allowed',
                 ].join(' ')}
               >
-                <Check size={16} /> Confirmer la réservation
+                {loading ? (
+                  <>
+                    <svg className="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                    </svg>
+                    Envoi en cours…
+                  </>
+                ) : (
+                  <><Check size={16} /> Confirmer la réservation</>
+                )}
               </button>
             )}
           </div>
